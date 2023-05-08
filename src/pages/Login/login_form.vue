@@ -1,0 +1,122 @@
+<template>
+    <el-form :model="ruleForm" ref="subRefs" :rules="rules" class="login-form"
+        @keyup.enter.native="submitForm">
+        <el-form-item class="user-item" prop="username">
+            <el-input placeholder="请输入您的手机号" v-model="ruleForm.username" class="user-ipt">
+                <div slot="prefix" class="user-prefix">
+                    <img src="@/static/images/username-icon.png" />
+                </div>
+            </el-input>
+        </el-form-item>
+        <el-form-item class="pwd-item" prop="password">
+            <el-input placeholder="请输入您的登录密码" v-model="ruleForm.password" show-password class="pwd-ipt">
+                <div slot="prefix" class="pwd-prefix">
+                    <img src="@/static/images/password-icon.png" />
+                </div>
+            </el-input>
+        </el-form-item>
+        <el-form-item class="pwd-item" style="margin-top: 2.083vw; width: 100%">
+            <el-button type="primary" style="width: 100%" @click="submitForm">登录</el-button>
+        </el-form-item>
+    </el-form>
+</template>
+
+<script lang="ts">
+import { reactive, ref } from 'vue';
+import {ElFormRef} from 'element-plus';
+import type { ElFormRef } from 'element-plus/lib/components/form/src/form.type';
+
+export default {
+    setup() {
+        const ruleForm = reactive({
+            username: "",
+            password: ""
+        });
+
+        const rules = reactive({
+            username: [
+                { required: true, message: '请输入手机号码', trigger: 'blur' }
+            ],
+            password: [
+                { required: true, message: '请输入密码', trigger: 'blur' }
+            ]
+        });
+
+        const subRefs = ref<ElFormRef>();
+
+        const submitForm = () => {
+            console.log(subRefs, "---", subRefs.value.validate);
+            // if(subRefs.value) {
+            //     subRefs.value.validate( async (valid: Boolean) => {
+            //     if(valid) {
+            //         try {
+            //             let result: { data: string, status: number, msg?: string } = await singin(this.ruleForm);
+            //             jsCookie.set('loginToken', result.data, {
+            //                 path   : '/',
+            //                 domain : window.location.hostname
+            //             });
+            //             this.$router.push("/");
+            //         }catch(error: any) {
+            //             this.$message.error(error.msg? error.msg: "登录失败!")
+            //         }
+            //     }
+            // })
+            // }
+        };
+
+        return { 
+            ruleForm, 
+            rules,
+            submitForm,
+            subRefs
+        }
+    },
+}
+</script>
+
+<style scoped lang="scss">
+.login-box {
+    width: 100%;
+    height: 100%;
+    // background: linear-gradient(to right bottom, #343f5f, #131b35 40%);
+    background-image: url("@/static/images/login-bgc.png");
+    background-size: 100% 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    .login{
+        width: 31.25vw;
+        height: 25.625vw;
+        background: rgba(255,255,255,0.1);
+        // box-shadow: 0px 16px 40px 0px rgba(176,175,194,0.33);
+        border-radius: 24px;
+        border: 1px solid rgba(255,255,255,0.15);
+        backdrop-filter: blur(10px);
+        padding: 2.083vw 0 0 0;
+        box-sizing: border-box;
+
+        .login-form{
+            width: 22.916vw;
+            margin: 0 auto;
+            margin-top: 2.083vw;
+        }
+
+        img {
+            margin: 0 auto;
+            width: 2.3vw;
+            height: 2.3vw;
+        }
+
+        .title {
+            width: 100%;
+            text-align: center;
+            font-size: 1.4583vw;
+            font-family: PingFangSC-Medium, PingFang SC;
+            font-weight: 500;
+            color: #FFFFFF;
+            margin-top: .83vw;
+        }
+    }
+}
+</style>
