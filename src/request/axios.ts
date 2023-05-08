@@ -5,14 +5,12 @@
  */
 
 import axios, { AxiosRequestConfig, AxiosRequestHeaders } from 'axios';
-import { useRoute } from 'vue-router';
 import router from '../router/router';
+import { parseQuery } from "@/utils/index";
 
 interface customOptionsConfig {
   repeat_request_cancel?: boolean;
-}
-
-const route = useRoute();
+};
 
 // 存储正在padding中得请求
 const pendingMap = new Map();
@@ -24,7 +22,7 @@ const LoadingInstance = {
 
 const reAxios = (axiosConfig: AxiosRequestConfig, customOptions?: customOptionsConfig) => {
   const service = axios.create({
-    baseURL: process.env.VUE_APP_BASEURL + '/',
+    baseURL: import.meta.env.VITE_API_BASEURL,
     timeout: 10000,
     withCredentials: true,
   });
@@ -102,11 +100,10 @@ const reAxios = (axiosConfig: AxiosRequestConfig, customOptions?: customOptionsC
  * @returns Array
  */
 const getPendingKey = (config: AxiosRequestConfig) => {
-  const { url, method, params, data } = config;
+  let { url, method, data } = config;
   try {
     if (typeof data === 'string') {
-      // data = route.query();
-      console.log('axios 出错拉 ！！');
+      data = parseQuery(data);
     }
     return [url, method, JSON.stringify(data)].join('&');
   } catch (error) {

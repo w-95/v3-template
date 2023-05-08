@@ -23,16 +23,24 @@
 
 <script lang="ts">
 import { reactive, ref } from 'vue';
-import {ElFormRef} from 'element-plus';
-import type { ElFormRef } from 'element-plus/lib/components/form/src/form.type';
+import { useRouter } from 'vue-router';
+import { ElMessage } from 'element-plus/lib/components/index.js';
+// import { Input } from 'element-plus/lib/components/input';
+import { useGlobalStore } from '@/store/global';
+import pinia from "@/store/store";
+
+import type { ElFormRef } from "../../../typings/element-plus.d.ts";
 
 export default {
     setup() {
+        const subRefs = ref<ElFormRef>();
+        const globalStore = useGlobalStore(pinia);
+        const router = useRouter();
+
         const ruleForm = reactive({
             username: "",
             password: ""
         });
-
         const rules = reactive({
             username: [
                 { required: true, message: '请输入手机号码', trigger: 'blur' }
@@ -42,26 +50,25 @@ export default {
             ]
         });
 
-        const subRefs = ref<ElFormRef>();
-
         const submitForm = () => {
-            console.log(subRefs, "---", subRefs.value.validate);
-            // if(subRefs.value) {
-            //     subRefs.value.validate( async (valid: Boolean) => {
-            //     if(valid) {
-            //         try {
-            //             let result: { data: string, status: number, msg?: string } = await singin(this.ruleForm);
-            //             jsCookie.set('loginToken', result.data, {
-            //                 path   : '/',
-            //                 domain : window.location.hostname
-            //             });
-            //             this.$router.push("/");
-            //         }catch(error: any) {
-            //             this.$message.error(error.msg? error.msg: "登录失败!")
-            //         }
-            //     }
-            // })
-            // }
+            if(subRefs.value) {
+                subRefs.value.validate( async (valid: Boolean) => {
+                if(valid) {
+                    let { data, status, msg } = await globalStore.signIn( ruleForm );
+                    if(data && status === 0) {
+                        let [{ status: userStatus}, { status: menuStatus}] = await globalStore.updateUserInfo();
+                        if( menuStatus !== 0 || userStatus !== 0) {
+                            let msg = menuStatus !== 0? '获取侧边栏路由异常!': '获取用户信息异常!'
+                            ElMessage.error(msg);
+                            return;
+                        };
+                        router.push({ name: "Console"});
+                        return;
+                    };
+                    ElMessage.error(msg? msg: '获取Token异常!');
+                }
+            })
+            }
         };
 
         return { 

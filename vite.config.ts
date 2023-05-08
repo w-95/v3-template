@@ -18,6 +18,9 @@ export default defineConfig({
     }),
   ],
 
+  // 否则拿不到process对象
+  define: { 'process.env': {} },
+
   resolve: {
     alias: {
       '@': path.resolve(__dirname, 'src'),
@@ -38,16 +41,13 @@ export default defineConfig({
     open: true,
     https: false,
     proxy: {
-      web_fe_api: {
-        target: 'https://w.droid.ac.cn/businessUser',
+      '/web_fe_api': {
+        target: 'https://x.droid.ac.cn/robotcloud_backend',
+        changeOrigin: true,
         secure: false,
         rewrite: (path) => path.replace(/^\/web_fe_api/, ''),
         ws: true,
-      },
-      '/device/manage': {
-        target: 'https://w.droid.ac.c',
-        secure: false,
-      },
+      }
     },
   },
 

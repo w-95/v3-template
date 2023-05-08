@@ -1,8 +1,11 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router';
 
+import { useGlobalStore } from '@/store/global';
+import pinia from "@/store/store";
+
 const routes: RouteRecordRaw[] = [
   {
-    path: '/a',
+    path: '/',
     name: 'Console',
     meta: {
       title: '首页',
@@ -13,7 +16,7 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/pages/Console/index.vue'),
   },
   {
-    path: '/',
+    path: '/login',
     name: 'Login',
     meta: {
       title: '登录',
@@ -24,7 +27,7 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/pages/Login/index.vue'),
     children: [
       {
-        path: '/',
+        path: '',
         name: 'LoginFirm',
         meta: { transition: "fade", requireAuth: false },
         component: () => import('@/pages/Login/login_form.vue'),
@@ -44,8 +47,14 @@ const router = createRouter({
   routes,
 });
 
-router.beforeEach((to, from) => {
-  // if (to.meta.requiresAuth && !auth.isLoggedIn()) {}
+const globalStore = useGlobalStore(pinia);
+
+router.beforeEach((to , from , next) => {
+
+  if (to.meta.requireAuth && !globalStore.checkAuth()) {
+    router.push({ name: "LoginFirm"});
+  };
+  next();
 })
 
 export default router;
