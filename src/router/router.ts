@@ -6,14 +6,22 @@ import pinia from "@/store/store";
 const routes: RouteRecordRaw[] = [
   {
     path: '/',
-    name: 'Console',
+    name: 'Index',
     meta: {
       title: '首页',
       keepAlive: true,
       requireAuth: true,
       transition: "fade"
     },
-    component: () => import('@/pages/Console/index.vue'),
+    component: () => import('@/pages/index.vue'),
+    children: [
+      {
+        path: '',
+        name: 'Console',
+        meta: { transition: "fade", requireAuth: true },
+        component: () => import('@/pages/Console/index.vue'),
+      }
+    ]
   },
   {
     path: '/login',

@@ -39,7 +39,7 @@
             font-size: 1.4583vw;
             font-family: PingFangSC-Medium, PingFang SC;
             font-weight: 500;
-            color: #FFFFFF;
+            color: #000;
             margin-top: .83vw;
         }
     }
