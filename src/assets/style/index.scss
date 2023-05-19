@@ -2,3 +2,20 @@
     width: 100%;
     height: 100%;
 }
+
+.root-right-container-main-box{
+    margin: 20px;
+    box-sizing: border-box;
+    background-color: #FFF;
+    border: 1px solid red;
+    padding: 0;
+}
+
+.root-left-aside{
+    box-shadow: 2px 0 8px 0 rgba(185,187,194,.4);
+}
+
+.root-right-footer{
+    margin-left: 20px;
+    background-color: black;
+}

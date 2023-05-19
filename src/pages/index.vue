@@ -2,7 +2,7 @@
   <el-container class="root-container-box">
 
     <!-- left -->
-    <el-aside style="width:auto">
+    <el-aside style="width:auto" class="root-left-aside">
       <LeftMenu></LeftMenu>
     </el-aside>
 
@@ -11,11 +11,11 @@
 
       <el-header style="background-color: #545c64;">Header</el-header>
 
-      <el-main style="background-color: black;">
+      <el-main class="root-right-container-main-box">
         <RouterView></RouterView>
       </el-main>
 
-      <el-footer style="background-color: greenyellow;">Footer</el-footer>
+      <el-footer class="root-right-footer"></el-footer>
 
     </el-container>
 

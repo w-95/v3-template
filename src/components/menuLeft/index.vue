@@ -1,5 +1,5 @@
 <template>
-    <el-menu default-active="2" :style="{'width': isCollapse ? 'auto': '300px'}" class="el-menu-vertical-demo" :collapse="isCollapse" @open="handleOpen"
+    <el-menu default-active="2" :style="{'width': isCollapse ? 'auto': '280px'}" class="el-menu-vertical-demo" :collapse="isCollapse" @open="handleOpen"
         @close="handleClose">
         <el-menu-item index="0" class="bottom-menu-item-first" @click="setIsCollapse">
             LOGO
@@ -82,9 +82,9 @@ const setIsCollapse = () => {
 <style scoped lang="scss">
 .el-menu-vertical-demo{
     position: relative;
-    width: 100%;
     height: 100%;
     transition: all .3s;
+    border: none;
 }
 
 .zhy, .zhz{
