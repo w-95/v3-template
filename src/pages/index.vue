@@ -9,7 +9,13 @@
     <!-- 右侧contation -->
     <el-container>
 
-      <el-header style="background-color: #545c64;">Header</el-header>
+      <el-header class="root-el-header">
+        <span class="header-logo-text">机器人管理</span>
+
+        <view>
+          <Avatar name="伯鑫" :phone="15311339974"  />
+        </view>
+      </el-header>
 
       <el-main class="root-right-container-main-box">
         <RouterView></RouterView>
@@ -24,9 +30,11 @@
 
 <script setup lang="ts">
 import LeftMenu from '@/components/menuLeft/index.vue';
+import Avatar from "@/components/avatar/index.vue";
 
 </script>
 
 <style scoped lang="scss">
 @import url("@/assets/style/index.scss");
+
 </style>

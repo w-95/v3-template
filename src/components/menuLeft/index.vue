@@ -1,10 +1,15 @@
 <template>
     <el-menu default-active="2" :style="{'width': isCollapse ? 'auto': '280px'}" class="el-menu-vertical-demo" :collapse="isCollapse" @open="handleOpen"
         @close="handleClose">
-        <el-menu-item index="0" class="bottom-menu-item-first" @click="setIsCollapse">
-            LOGO
+        <el-menu-item index="1" class="bottom-menu-item-first" @click="setIsCollapse">
+            <el-icon>
+                <img src="/src/assets/images/newlogo1.png" class="logo-img" />
+            </el-icon>
+            <template #title>
+                <img src="/src/assets/images/logo-text.png" class="logo-text" />
+            </template>
         </el-menu-item>
-        <el-sub-menu index="1">
+        <el-sub-menu index="2">
             <template #title>
                 <el-icon>
                     <location />
@@ -14,34 +19,34 @@
             
             <el-menu-item-group>
                 <template #title><span>Group One</span></template>
-                <el-menu-item index="1-1">item one</el-menu-item>
-                <el-menu-item index="1-2">item two</el-menu-item>
+                <el-menu-item index="2-1">item one</el-menu-item>
+                <el-menu-item index="2-2">item two</el-menu-item>
             </el-menu-item-group>
             <el-menu-item-group title="Group Two">
-                <el-menu-item index="1-3">item three</el-menu-item>
+                <el-menu-item index="2-3">item three</el-menu-item>
             </el-menu-item-group>
-            <el-sub-menu index="1-4">
+            <el-sub-menu index="2-4">
                 <template #title><span>item four</span></template>
-                <el-menu-item index="1-4-1">item one</el-menu-item>
+                <el-menu-item index="2-4-1">item one</el-menu-item>
             </el-sub-menu>
         </el-sub-menu>
-        <el-menu-item index="2">
+        <el-menu-item index="3">
             <el-icon><icon-menu /></el-icon>
             <template #title>Navigator Two</template>
         </el-menu-item>
-        <el-menu-item index="3" disabled>
+        <el-menu-item index="4" disabled>
             <el-icon>
                 <document />
             </el-icon>
             <template #title>Navigator Three</template>
         </el-menu-item>
-        <el-menu-item index="4">
+        <el-menu-item index="5">
             <el-icon>
                 <setting />
             </el-icon>
             <template #title>Navigator Four</template>
         </el-menu-item>
-        <el-menu-item index="5" class="bottom-menu-item-last" @click="setIsCollapse">
+        <el-menu-item index="6" class="bottom-menu-item-last" @click="setIsCollapse">
             <el-icon>
             <span class="icon iconfont zhankai-you zhy" v-show="isCollapse">&#xe635;</span>
             </el-icon>
@@ -100,5 +105,21 @@ const setIsCollapse = () => {
     position: absolute;
     bottom: 50px;
     width: 100%;
+}
+
+.logo-img{
+    width: 40px;
+    height: 40px;
+}
+
+.logo-text{
+    width: 220px;
+    margin-left: 10px;
+}
+
+.logo-text-end{
+    color: #FFF;
+    font-size: 18px;
+    // z-index: 99;
 }
 </style>
