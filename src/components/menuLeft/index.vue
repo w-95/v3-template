@@ -77,14 +77,14 @@
             <el-menu-item-group class="bottom-ment-item-9-sub">
                 <el-menu-item index="9-1">
                     <Colors :colors="THEME_DARK"></Colors>
-                    <el-switch :value="themeType === theme.defaultTheme" class="mt-2" style="margin-left: 24px" inline-prompt :active-icon="Check"
+                    <el-switch :value="themeType === theme.defaultTheme" class="mt-2" style="margin-left: 24px; max-width: 45px; min-width: 35px;" inline-prompt :active-icon="Check"
                         :inactive-icon="Close" @change="themeChange(theme.defaultTheme)" />
                 </el-menu-item>
             </el-menu-item-group>
             <el-menu-item-group class="bottom-ment-item-9-sub">
                 <el-menu-item index="9-2">
                     <Colors :colors="THEME_DEFAULT"></Colors>
-                    <el-switch :value="themeType === theme.dark" class="mt-2" style="margin-left: 24px" inline-prompt :active-icon="Check"
+                    <el-switch :value="themeType === theme.dark" class="mt-2" style="margin-left: 24px;max-width: 45px; min-width: 35px;" inline-prompt :active-icon="Check"
                         :inactive-icon="Close" @change="themeChange(theme.dark)" />
                 </el-menu-item>
             </el-menu-item-group>

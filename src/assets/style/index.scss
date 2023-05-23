@@ -3,6 +3,11 @@
     height: 100%;
 }
 
+.root-right-container{
+    background-color: var(--el-root-right-container-bg);
+    transition: all .3s;
+}
+
 .root-right-container-main-box{
     margin: 20px;
     box-sizing: border-box;
@@ -11,6 +16,7 @@
 
 .root-left-aside{
     box-shadow: 2px 0 8px 0 rgba(185,187,194,.4);
+    z-index: 99;
 }
 
 .root-right-footer{

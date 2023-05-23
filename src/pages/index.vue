@@ -7,7 +7,7 @@
     </el-aside>
 
     <!-- 右侧contation -->
-    <el-container>
+    <el-container class="root-right-container">
 
       <el-header class="root-el-header">
         <span class="header-logo-text">机器人管理</span>

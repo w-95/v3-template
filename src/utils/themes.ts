@@ -85,18 +85,20 @@ export default {
       '--el-border': 'var(--el-border-width) var(--el-border-style) var(--el-border-color)',
       '--el-svg-monochrome-grey': 'var(--el-border-color)',
       // menu el-sub-menu__title
-      '--el-sub-menu-bg': '#FFF'
+      '--el-sub-menu-bg': '#FFF',
+      // 根下的右侧container
+      '--el-root-right-container-bg': '#FFF'
     },
     THEME_DARK: {
       'color-scheme': 'dark',
       '--el-color-white': '#d7c9c6',
       '--el-color-black': '#012447',
-      '--el-color-primary': '#409eff',
+      '--el-color-primary': '#a04d66',
       '--el-color-primary-light-3': '#79bbff',
       '--el-color-primary-light-5': '#a0cfff',
       '--el-color-primary-light-7': '#c6e2ff',
       '--el-color-primary-light-8': '#d9ecff',
-      '--el-color-primary-light-9': '#ecf5ff',
+      '--el-color-primary-light-9': '#ecd2c5',
       '--el-color-primary-dark-2': '#337ecc',
       '--el-color-success': '#67c23a',
       '--el-color-success-light-3': '#95d475',
@@ -136,13 +138,13 @@ export default {
       '--el-bg-color': '#d7c9c6',
       '--el-bg-color-page': '#d7c9c6',
       '--el-bg-color-overlay': '#d7c9c6',
-      '--el-text-color-primary': '#FFFFFF', // 主要文字颜色
-      '--el-text-color-regular': '#FFFFFF', // 常规文字颜色
-      '--el-text-color-placeholder': '#c0c4cc', // 占位文字颜色
+      '--el-text-color-primary': '#4f2733', // 主要文字颜色
+      '--el-text-color-regular': '#4f2733', // 常规文字颜色
+      '--el-text-color-placeholder': '#685844', // 占位文字颜色
       '--el-text-color-secondary': '#FFFFFF', // 次要文字颜色
       '--el-text-color-disabled': '#c0c4cc',
-      '--el-border-color': '#388DE0',  // 
-      '--el-border-color-light': '#388DE0', // 二级边框颜色
+      '--el-border-color': '#a04d66',  //  
+      '--el-border-color-light': '#a04d66', // 二级边框颜色
       '--el-border-color-lighter': '#58A9F5', // 三级边框颜色
       '--el-border-color-extra-light': '#86B3F9', // 四级边框颜色
       '--el-border-color-dark': '#d4d7de',
@@ -168,10 +170,12 @@ export default {
       '--el-mask-color-extra-light': 'rgba(255, 255, 255, .3)',
       '--el-border-width': '1px',
       '--el-border-style': 'solid',
-      '--el-border-color-hover': 'var(--el-text-color-disabled)',
+      '--el-border-color-hover': 'red',
       '--el-border': 'var(--el-border-width) var(--el-border-style) var(--el-border-color)',
       '--el-svg-monochrome-grey': 'var(--el-border-color)',
       // menu el-sub-menu__title
-      '--el-sub-menu-bg': '#d7c9c6'
+      '--el-sub-menu-bg': '#d7c9c6',
+      // 根下的右侧container
+      '--el-root-right-container-bg': '#ecd2c5'
     }
   }
