@@ -1,6 +1,6 @@
 <template>
     <div>
-        <div class="avatar-box" :style="{ 'background': bgColor, 'color': fontColor, 'width': width + 'px', 'height': height + 'px' }">{{ userName }}</div>
+        <div class="avatar-box animate__animated animate__fadeIn" :style="{ 'background': bgColor, 'color': fontColor, 'width': width + 'px', 'height': height + 'px' }">{{ userName }}</div>
         <!-- <el-avatar v-else shape="square" :size="100" :fit="fit" :src="src" /> -->
     </div>
 </template>

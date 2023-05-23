@@ -6,8 +6,6 @@
 .root-right-container-main-box{
     margin: 20px;
     box-sizing: border-box;
-    background-color: #FFF;
-    border: 1px solid red;
     padding: 0;
 }
 
@@ -17,17 +15,14 @@
 
 .root-right-footer{
     margin-left: 20px;
-    background-color: black;
 }
 
 .root-el-header {
-    background-color: #545c64;
     display: flex;
     align-items: center;
     justify-content: space-between;
 }
 .header-logo-text{
   font-size: 18px;
-  color: #FFF;
   
 }

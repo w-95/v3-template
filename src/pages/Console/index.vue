@@ -1,5 +1,5 @@
 <template>
-  <div class="console-box">123</div>
+  <div class="console-box animate__backInDown animate__animated">123</div>
 </template>
 
 <script lang="ts" setup>
