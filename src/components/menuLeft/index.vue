@@ -9,6 +9,9 @@
                 <img src="/src/assets/images/logo-text.png" class="logo-text" />
             </template> -->
         </el-menu-item>
+
+        <!-- <Menu :menuList="menuList"></Menu> -->
+
         <el-sub-menu index="2">
             <template #title>
                 <el-icon>
@@ -30,6 +33,7 @@
                 <el-menu-item index="2-4-1">item one</el-menu-item>
             </el-sub-menu>
         </el-sub-menu>
+
         <el-menu-item index="3">
             <el-icon><icon-menu /></el-icon>
             <template #title>Navigator Two</template>
@@ -76,14 +80,15 @@
 
             <el-menu-item-group class="bottom-ment-item-9-sub">
                 <el-menu-item index="9-1">
-                    <Colors :colors="THEME_DARK"></Colors>
+                    <Colors :colors="THEME_DEFAULT"></Colors>
                     <el-switch :value="themeType === theme.defaultTheme" class="mt-2" style="margin-left: 24px; max-width: 45px; min-width: 35px;" inline-prompt :active-icon="Check"
                         :inactive-icon="Close" @change="themeChange(theme.defaultTheme)" />
                 </el-menu-item>
             </el-menu-item-group>
             <el-menu-item-group class="bottom-ment-item-9-sub">
                 <el-menu-item index="9-2">
-                    <Colors :colors="THEME_DEFAULT"></Colors>
+                    <Colors :colors="THEME_DARK"></Colors>
+                    
                     <el-switch :value="themeType === theme.dark" class="mt-2" style="margin-left: 24px;max-width: 45px; min-width: 35px;" inline-prompt :active-icon="Check"
                         :inactive-icon="Close" @change="themeChange(theme.dark)" />
                 </el-menu-item>
@@ -106,30 +111,41 @@ import {
 
 import ThemesIcon from "@/components/themesIcon/index.vue";
 import Colors from "@/components/colors/index.vue";
+// import Menu from "./menu.tsx";
 
 import { THEME_DARK, THEME_DEFAULT } from "@/data/themems";
 import { themeVar } from "@/data/index";
 
-import {theme} from "@/interface/enum";
+import { theme } from "@/interface/enum";
 import { useThemeStore } from "@/store/theme";
+import { useGlobalStore } from "@/store/global";
 
 import themeObj from "@/utils/themes";
 
 const store = useThemeStore();
+const globalStore = useGlobalStore();
 
 const isCollapse = ref(false);
 const themeType:Ref<theme> = ref(theme.defaultTheme);
+// let menuList: any = reactive([]);
 
-// 初始化当前的主题
 onMounted(() => {
+    initTheme();
+    
+    // 初始化侧边栏
+    // menuList = globalStore.menuRoutes;
+});
+
+// 初始化主题
+const initTheme = () => {
     const storeTheme = store.getSystemTheme;
     themeType.value = storeTheme || theme.defaultTheme;
     const themeConfig = themeObj[themeType.value];
 
     Object.keys(themeConfig).map((item) => {
       document.documentElement.style.setProperty(item, (themeConfig as any)[item])
-    })
-});
+    });
+}
 
 // 更换主题
 const themeChange = (value: theme) => {

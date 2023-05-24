@@ -4,13 +4,17 @@ import jsCookie from "js-cookie";
 
 import { singin, getUserInfo, getMenuRoute } from "@/request/user.ts";
 import { loginParamT } from "@/interface/apiParams.ts";
+import { UserInfoT } from "@/interface/user.ts";
+import { MenuListT } from "@/interface/menu";
+import { leftMenuRoutersVar, userInfoVar, loginTokenVar } from '@/data';
+
 
 export const useGlobalStore = defineStore({
   id: 'global',
   state: () => {
     return {
-      userInfo: null,
-      menuRoutes: [],
+      userInfo: {} as UserInfoT,
+      menuRoutes: [] as unknown as MenuListT,
       globalLoading: false,
       isAuth: false,
       token: ""
@@ -24,7 +28,7 @@ export const useGlobalStore = defineStore({
   actions: {
     // 校验是否登录
     checkAuth() {
-      const loginToken = jsCookie.get('loginToken');
+      const loginToken = jsCookie.get(loginTokenVar);
       if(loginToken) {
         this.isAuth = true;
         return true;
@@ -41,7 +45,7 @@ export const useGlobalStore = defineStore({
       const { data, status } = result;
 
       if(data && status === 0) {
-        jsCookie.set('loginToken', data, {
+        jsCookie.set(loginTokenVar, data, {
           path: '/',
           domain: window.location.hostname,
         });
@@ -69,11 +73,13 @@ export const useGlobalStore = defineStore({
       // 将用户信息存起来
       if(infoData && infoStatus ===0) {
         this.userInfo = infoData;
+        localStorage.setItem(userInfoVar, JSON.stringify(infoData));
       };
 
       // 将导航侧边栏存起来
       if(menuData && menuStatus === 0) {
         this.menuRoutes = menuData;
+        localStorage.setItem(leftMenuRoutersVar, menuData);
       };
 
       return requestAll;
