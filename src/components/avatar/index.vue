@@ -35,9 +35,9 @@ export default ({
             default: "D"
         },
         phone: {
-            type: Number,
+            type: String,
             required: true,
-            default: 18888888888
+            default: '18888888888'
         },
         width: {
             type: Number,

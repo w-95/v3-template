@@ -14,7 +14,7 @@
           <span class="header-logo-text">机器人管理</span>
           <el-popover placement="bottom" trigger="click">
             <template #reference>
-              <Avatar :name="userInfo? userInfo.realName: ''" :phone="userInfo? userInfo.mobile: 15311339974"  />
+              <Avatar :name="userInfo? userInfo.realName: ''" :phone="userInfo? userInfo.mobile: '18888888888'"  />
             </template>
             <div class="user-action-view">
 
