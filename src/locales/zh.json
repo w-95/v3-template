@@ -1,0 +1,52 @@
+{
+    "menuLeft": {
+        "prodMgmt": {
+            "name": "产品管理",
+            "child": {
+                "pordList": "产品列表",
+                "logRecords": "日志抓取记录",
+                "customRes": "定制资源",
+                "devList": "设备列表"
+            }
+        },
+        "disRobot": {
+            "name": "消毒机器人",
+            "child": {
+                "STS": "定时任务统计",
+                "WM": "预警消息"
+            }
+        },
+        "DR": {
+            "name": "配送机器人",
+            "child": {
+                "ODS": "订单配送统计",
+                "HDL": "帮取送列表",
+                "WM": "预警消息",
+                "MD": "基础数据",
+                "callList": "呼叫列表",
+                "AS": "异常统计"
+            }
+        },
+        "versionC": {
+            "name": "版本管理",
+            "child": {
+                "vList": "版本列表"
+            }
+        },
+        "CRM": {
+            "name": "客户管理",
+            "child": {
+                "CustomerList": "客户列表"
+            }
+        },
+        "UC": {
+            "name": "用户中心",
+            "child": {
+                "privacy": "个人中心"
+            }
+        },
+        "mSetting": "Multiple settings",
+        "setting": "设置",
+        "themes": "主题"
+    }
+}

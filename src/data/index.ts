@@ -10,3 +10,6 @@ export const leftMenuRoutersVar = "MENU_ROUTERS";
 
 // token存储在本地的key
 export const loginTokenVar = "loginToken";
+
+// 系统语言存储在本地的key
+export const locale = "LOCALE";

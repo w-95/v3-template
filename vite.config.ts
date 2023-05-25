@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
+import vueI18n from "@intlify/vite-plugin-vue-i18n";
 import path from 'path';
 
 import viteCompression from 'vite-plugin-compression';
@@ -17,7 +18,10 @@ export default defineConfig({
       algorithm: 'gzip',
       ext: '.gz',
     }),
-    vueJsx()
+    vueJsx(),
+    vueI18n({
+      include: path.resolve(__dirname, './locales/**')
+    })
   ],
 
   // 否则拿不到process对象

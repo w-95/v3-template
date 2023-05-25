@@ -1,0 +1,52 @@
+{
+    "menuLeft": {
+        "prodMgmt": {
+            "name": "Product management",
+            "child": {
+                "pordList": "Product list",
+                "logRecords": "log capture records",
+                "customRes": "bespoke resources",
+                "devList": "equipment list"
+            }
+        },
+        "disRobot": {
+            "name": "disinfection robot",
+            "child": {
+                "STS": "Scheduled task statistics",
+                "WM": "warning messages"
+            }
+        },
+        "DR": {
+            "name": "delivery robot",
+            "child": {
+                "ODS": "order delivery statistics",
+                "HDL": "Help Delivery List",
+                "WM": "warning messages",
+                "MD": "Master Data",
+                "callList": "Call list",
+                "AS": "Abnormality statistics"
+            }
+        },
+        "versionC": {
+            "name": "Version Control",
+            "child": {
+                "vList": "Version list"
+            }
+        },
+        "CRM": {
+            "name": "Customer Relationship Managemen",
+            "child": {
+                "CustomerList": "Customer List"
+            }
+        },
+        "UC": {
+            "name": "Account Center",
+            "child": {
+                "privacy": "Privacy"
+            }
+        },
+        "mSetting": "Multiple settings",
+        "setting": "Settings",
+        "themes": "Themes"
+    }
+}

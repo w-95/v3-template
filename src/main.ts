@@ -1,6 +1,7 @@
 import { createApp } from 'vue';
 import elementPlus from 'element-plus';
 import jsCookie from "js-cookie";
+import i18n from '@/locales'
 import 'element-plus/dist/index.css';
 
 import '@/assets/fonts/iconfont.css';
@@ -20,7 +21,7 @@ const app = createApp(App);
 app.use(elementPlus);
 app.use(pinia);
 app.use(router);
-
+app.use(i18n);
 
 const themeStore = useThemeStore();
 const globalStore = useGlobalStore();
