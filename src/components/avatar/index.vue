@@ -89,4 +89,8 @@ export default ({
     text-align: center;
     justify-content: center;
 }
+.avatar-box:hover {
+    cursor: pointer;
+}
+
 </style>

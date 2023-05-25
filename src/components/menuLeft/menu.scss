@@ -1,0 +1,39 @@
+
+.left-menu-box{
+    position: relative;
+    transition: all .3s;
+    height: 100%;
+}
+.zhy,
+.zhz {
+    font-size: 24px;
+    color: black;
+}
+
+.bottom-menu-item-first {
+    height: 60px;
+}
+
+.el-menu-vertical-demo{
+    width: 100%;
+    border: none;
+    transition: all .3s;
+}
+
+.bottom-menu-item-last,
+
+.logo-img {
+    width: 40px;
+    height: 40px;
+}
+
+.logo-text {
+    width: 220px;
+    margin-left: 10px;
+}
+
+.logo-text-end {
+    color: #FFF;
+    font-size: 18px;
+    // z-index: 99;
+}

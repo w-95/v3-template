@@ -29,10 +29,20 @@
   filter: drop-shadow(0 0 2em #42b883aa);
 }
 
-.bottom-ment-item-9 > .el-sub-menu__title{
+.bottom-ment-item-9 > .el-sub-menu__title,
+.bottom-ment-item-3 > .el-sub-menu__title,
+.bottom-ment-item-2 > .el-sub-menu__title,
+.bottom-ment-item-4 > .el-sub-menu__title,
+.bottom-ment-item-5 > .el-sub-menu__title,
+.bottom-ment-item-6 > .el-sub-menu__title{
   background: var(--el-sub-menu-bg);
 }
-.bottom-ment-item-9-sub > .el-menu-item-group__title{
+.bottom-ment-item-9-sub > .el-menu-item-group__title,
+.bottom-ment-item-2-sub > .el-menu-item-group__title,
+.bottom-ment-item-3-sub > .el-menu-item-group__title,
+.bottom-ment-item-4-sub > .el-menu-item-group__title,
+.bottom-ment-item-5-sub > .el-menu-item-group__title,
+.bottom-ment-item-6-sub > .el-menu-item-group__title{
   padding: 0 !important;
 }
 </style>

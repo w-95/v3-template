@@ -79,7 +79,7 @@ export const useGlobalStore = defineStore({
       // 将导航侧边栏存起来
       if(menuData && menuStatus === 0) {
         this.menuRoutes = menuData;
-        localStorage.setItem(leftMenuRoutersVar, menuData);
+        localStorage.setItem(leftMenuRoutersVar, JSON.stringify(menuData));
       };
 
       return requestAll;

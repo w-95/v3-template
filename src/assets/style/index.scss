@@ -17,6 +17,12 @@
 .root-left-aside{
     box-shadow: 2px 0 8px 0 rgba(185,187,194,.4);
     z-index: 99;
+    transition: all .3s;
+}
+
+::-webkit-scrollbar {
+    width: 0;
+    height: 10px;
 }
 
 .root-right-footer{
