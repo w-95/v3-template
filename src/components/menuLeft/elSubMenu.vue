@@ -4,12 +4,12 @@
             <el-icon>
                 <icon :path-name="title" />
             </el-icon>
-            <span>{{ title }}</span>
+            <span>{{ $t(`menuLeft.${lang}.name`) }}</span>
         </template>
 
         <el-menu-item-group v-for="(sub, idx) in subMenuChild" :key="sub.name" :class="[`bottom-ment-item-${index}-sub`]">
             <el-menu-item :index="index + '-' + (idx + 1)">
-                <span>{{ sub.name }}</span>
+                <span>{{ $t(`menuLeft.${lang}.child.${sub.lang}`) }}</span>
             </el-menu-item>
         </el-menu-item-group>
     </el-sub-menu>
@@ -33,6 +33,10 @@ const props = defineProps({
     subMenuChild: {
         type: Array as PropType<MenuT[]>,
         default: () => []
+    },
+    lang: {
+        type: String,
+        default: ""
     }
 });
 

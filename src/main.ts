@@ -16,7 +16,6 @@ import { useGlobalStore } from '@/store/global';
 import { theme } from './interface/enum';
 import { themeVar, loginTokenVar, userInfoVar, leftMenuRoutersVar } from "@/data/index";
 
-console.log(i18n)
 const app = createApp(App);
 
 app.use(elementPlus);

@@ -38,7 +38,7 @@ export default defineComponent({
             {(globalStore.menuRoutes as Array<MenuListT[]>).map((item: any, index) => {
               if (item.child) {
                 return (
-                  <ElSubMenu index={index + 2 + ''} title={item.name} subMenuChild={item.child}></ElSubMenu>
+                  <ElSubMenu index={index + 2 + ''} title={item.name} subMenuChild={item.child} lang={item.lang}></ElSubMenu>
                 );
               } else {
                 return <ElMenuItem index={index + 2 + ''} title={item.name}></ElMenuItem>;

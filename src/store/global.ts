@@ -7,6 +7,7 @@ import { loginParamT } from "@/interface/apiParams.ts";
 import { UserInfoT } from "@/interface/user.ts";
 import { MenuListT } from "@/interface/menu";
 import { leftMenuRoutersVar, userInfoVar, loginTokenVar } from '@/data';
+import { resetRouterLeft } from "@/utils/index";
 
 
 export const useGlobalStore = defineStore({
@@ -29,7 +30,7 @@ export const useGlobalStore = defineStore({
     // 校验是否登录
     checkAuth() {
       const loginToken = jsCookie.get(loginTokenVar);
-      if(loginToken) {
+      if(loginToken && (this.menuRoutes as any).length > 0) {
         this.isAuth = true;
         return true;
       }else {
@@ -78,6 +79,8 @@ export const useGlobalStore = defineStore({
 
       // 将导航侧边栏存起来
       if(menuData && menuStatus === 0) {
+        const newMenuData = resetRouterLeft(menuData);
+        console.log(newMenuData, "----");
         this.menuRoutes = menuData;
         localStorage.setItem(leftMenuRoutersVar, JSON.stringify(menuData));
       };

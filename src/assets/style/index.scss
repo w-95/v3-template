@@ -53,8 +53,8 @@
 
     .languages-box{
         position: relative;
-        width: 80px;
-        height: 40px;
+        width: 70px;
+        height: 35px;
         border-radius: 8px;
         background-color: #666;
         display: flex;
@@ -63,12 +63,11 @@
         color: #FFF;
 
         .lang-en, .lang-zh{
-            width: 40px;
+            width: 35px;
             height: 100%;
             text-align: center;
-            line-height: 40px;
-            font-weight: bold;
-            font-size: 18px;
+            line-height: 35px;
+            font-size: 14px;
             font-family:Arial, Helvetica, sans-serif;
             overflow: hidden;
         }
@@ -89,7 +88,7 @@
 
         .active-lang-en, .active-lang-zh{
             color: #666;
-            font-size: 20px;
+            font-size: 18px;
             transition: all .3s;
             z-index: 999;
         }
@@ -98,7 +97,7 @@
             position: absolute;
             width: 50%;
             height: 100%;
-            padding: 8px;
+            padding: 5px;
             box-sizing: border-box;
 
         }

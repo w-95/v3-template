@@ -34,7 +34,7 @@
             }
         },
         "CRM": {
-            "name": "Customer Relationship Managemen",
+            "name": "Customer management",
             "child": {
                 "CustomerList": "Customer List"
             }
