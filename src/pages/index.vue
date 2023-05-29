@@ -13,25 +13,24 @@
         <div>
           <span class="header-logo-text">{{ $t(`systemTitle`) }}</span>
 
-          <el-dropdown>
-            <span class="el-dropdown-link">
-              Language
-            </span>
-            <template #dropdown>
-              <el-dropdown-menu>
-                <el-dropdown-item v-for="(item, index) in languages" :key="index">
-                  <span @click="checkLang(item)">{{ item.title }}</span>
-                </el-dropdown-item>
-              </el-dropdown-menu>
-            </template>
-          </el-dropdown>
+          <div class="header-right">
+            <!-- 中英文切换 -->
+            <div class="languages-box">
+              <div :class="['lang-en', activeLang === 'en'? 'active-lang-en': '']" @click="checkLang('en')">A</div>
+              <div :class="['lang-zh', activeLang === 'zh'? 'active-lang-zh': '']" @click="checkLang('zh')">文</div>
+              <div :class="[activeLang === 'en'? 'text-bg-en': 'text-bg-zh']">
+                <div class="speed-lang"></div>
+              </div>
+            </div>
 
-          <el-popover placement="bottom" trigger="click">
-            <template #reference>
-              <Avatar :name="userInfo? userInfo.realName: ''" :phone="userInfo? userInfo.mobile: '18888888888'"  />
-            </template>
-            <div class="user-action-view"></div>
-          </el-popover>
+            <!-- 头像 -->
+            <el-popover placement="bottom" trigger="click">
+              <template #reference>
+                <Avatar :name="userInfo? userInfo.realName: ''" :phone="userInfo? userInfo.mobile: '18888888888'"  />
+              </template>
+              <div class="user-action-view"></div>
+            </el-popover>
+          </div>
         </div>
       </el-header>
 
@@ -47,22 +46,22 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue';
 import LeftMenu from '@/components/menuLeft/index.vue';
 import Avatar from "@/components/avatar/index.vue";
 import { useGlobalStore } from '@/store/global';
 import { useLocaleStore } from '@/store/locales';
-import { langs } from "@/locales/index";
-// import { langs } from '@/locales';
 
 const globalStore = useGlobalStore();
 const localStore = useLocaleStore();
 
-const languages = langs;
 const userInfo = globalStore.userInfo;
 
-const checkLang = (lang: { key: string, title: string}) => {
-  localStore.setLocale(lang.key);
-}
+const checkLang = (lang: string) => {
+  localStore.setLocale(lang);
+};
+
+const activeLang = computed(() => localStore.locale);
 
 </script>
 
