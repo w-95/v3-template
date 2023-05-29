@@ -48,5 +48,6 @@
         "mSetting": "Multiple settings",
         "setting": "设置",
         "themes": "主题"
-    }
+    },
+    "systemTitle": "机器人管理"
 }

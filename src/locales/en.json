@@ -48,5 +48,6 @@
         "mSetting": "Multiple settings",
         "setting": "Settings",
         "themes": "Themes"
-    }
+    },
+    "systemTitle": "Robot management"
 }
