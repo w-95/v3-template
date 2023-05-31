@@ -16,7 +16,7 @@
             </el-input>
         </el-form-item>
         <el-form-item class="pwd-item" style="margin-top: 2.083vw; width: 100%">
-            <el-button type="primary" style="width: 100%" @click="submitForm">登录</el-button>
+            <el-button type="primary" style="width: 100%; height: 50px;" @click="submitForm">登录</el-button>
         </el-form-item>
     </el-form>
 </template>
@@ -97,8 +97,8 @@ export default {
         height: 25.625vw;
         background: rgba(255,255,255,0.1);
         // box-shadow: 0px 16px 40px 0px rgba(176,175,194,0.33);
-        border-radius: 24px;
-        border: 1px solid rgba(255,255,255,0.15);
+        border-radius: 18px;
+        // border: 1px solid rgba(255,255,255,0.15);
         backdrop-filter: blur(10px);
         padding: 2.083vw 0 0 0;
         box-sizing: border-box;
@@ -126,4 +126,10 @@ export default {
         }
     }
 }
+
+.user-ipt, .pwd-ipt {
+    height: 50px;
+}
+
+
 </style>

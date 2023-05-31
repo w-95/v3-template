@@ -49,4 +49,14 @@
 .micon-tuichu{
   font-size: 16px;
 }
+
+.user-ipt .el-input__wrapper, .pwd-ipt .el-input__wrapper{
+    background-color: rgba(255, 255, 255, 0.07);
+    border: none;
+    box-shadow: 0 0 0 0px var(--el-input-border-color,var(--el-border-color)) inset;
+}
+
+.user-ipt .el-input__inner::placeholder, .pwd-ipt .el-input__inner::placeholder {
+  color: #FFF;
+}
 </style>
