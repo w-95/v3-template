@@ -49,5 +49,6 @@
         "setting": "设置",
         "themes": "主题"
     },
-    "systemTitle": "机器人管理"
+    "systemTitle": "机器人管理",
+    "logOut": "退出登录"
 }

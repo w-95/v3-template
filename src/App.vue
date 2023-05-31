@@ -45,4 +45,8 @@
 .bottom-ment-item-6-sub > .el-menu-item-group__title{
   padding: 0 !important;
 }
+
+.micon-tuichu{
+  font-size: 16px;
+}
 </style>

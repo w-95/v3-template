@@ -24,11 +24,13 @@
             </div>
 
             <!-- 头像 -->
-            <el-popover placement="bottom" trigger="click">
+            <el-popover placement="bottom" trigger="click" width="230">
               <template #reference>
                 <Avatar :name="userInfo? userInfo.realName: ''" :phone="userInfo? userInfo.mobile: '18888888888'"  />
               </template>
-              <div class="user-action-view"></div>
+              <div class="user-action-view">
+                <Account></Account>
+              </div>
             </el-popover>
           </div>
         </div>
@@ -49,6 +51,8 @@
 import { computed } from 'vue';
 import LeftMenu from '@/components/menuLeft/index.vue';
 import Avatar from "@/components/avatar/index.vue";
+import Account from "@/components/account/index.vue";
+
 import { useGlobalStore } from '@/store/global';
 import { useLocaleStore } from '@/store/locales';
 

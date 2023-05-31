@@ -123,10 +123,6 @@ export const resetRouterLeft = (routers: MenuListT) => {
       case '帮取送列表':
         item.lang = 'HDL';
         break;
-
-      case '预警消息':
-        item.lang = 'WM';
-        break;
       case '基础数据':
         item.lang = 'MD';
         break;

@@ -1,10 +1,17 @@
 {
-  "id": "",
-  "name": "",
+  "id": "4077116",
+  "name": "v3-t",
   "font_family": "iconfont",
   "css_prefix_text": "icon-",
   "description": "",
   "glyphs": [
+    {
+      "icon_id": "11833541",
+      "name": "退出",
+      "font_class": "tuichu",
+      "unicode": "e60d",
+      "unicode_decimal": 58893
+    },
     {
       "icon_id": "26632257",
       "name": "展开-右",

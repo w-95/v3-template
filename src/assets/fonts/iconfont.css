@@ -1,6 +1,8 @@
 @font-face {
-  font-family: "iconfont"; /* Project id  */
-  src: url('iconfont.ttf?t=1684487453285') format('truetype');
+  font-family: "iconfont"; /* Project id 4077116 */
+  src: url('iconfont.woff2?t=1685502739991') format('woff2'),
+       url('iconfont.woff?t=1685502739991') format('woff'),
+       url('iconfont.ttf?t=1685502739991') format('truetype');
 }
 
 .iconfont {
@@ -9,6 +11,10 @@
   font-style: normal;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-tuichu:before {
+  content: "\e60d";
 }
 
 .icon-zhankai-you:before {

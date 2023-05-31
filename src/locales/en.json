@@ -49,5 +49,6 @@
         "setting": "Settings",
         "themes": "Themes"
     },
-    "systemTitle": "Robot management"
+    "systemTitle": "Robot management",
+    "logOut": "Log out"
 }

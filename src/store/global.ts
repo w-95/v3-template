@@ -2,6 +2,8 @@ import { defineStore } from 'pinia';
 
 import jsCookie from "js-cookie";
 
+import router from "@/router/router";
+
 import { singin, getUserInfo, getMenuRoute } from "@/request/user.ts";
 import { loginParamT } from "@/interface/apiParams.ts";
 import { UserInfoT } from "@/interface/user.ts";
@@ -9,13 +11,12 @@ import { MenuListT } from "@/interface/menu";
 import { leftMenuRoutersVar, userInfoVar, loginTokenVar } from '@/data';
 import { resetRouterLeft } from "@/utils/index";
 
-
 export const useGlobalStore = defineStore({
   id: 'global',
   state: () => {
     return {
-      userInfo: {} as UserInfoT,
-      menuRoutes: [] as unknown as MenuListT,
+      userInfo: {} as UserInfoT | null,
+      menuRoutes: [] as unknown as MenuListT | [],
       globalLoading: false,
       isAuth: false,
       token: ""
@@ -59,7 +60,26 @@ export const useGlobalStore = defineStore({
     signUp() {},
 
     // 退出登录
-    signOut() {},
+    signOut() {
+      this.globalLoading = true;
+
+      // 移除cookie
+      jsCookie.remove(loginTokenVar);
+
+      this.isAuth = false;
+
+      router.push({ name: 'LoginFirm'});
+
+      setTimeout(() => {
+
+        // 移除用户信息
+        localStorage.removeItem(userInfoVar);
+        this.userInfo = null;
+        // 移除导航侧边栏
+        localStorage.removeItem(leftMenuRoutersVar);
+        this.menuRoutes = [];
+      }, 3000);
+    },
 
     // 更新用户信息和用户的侧边栏
     async updateUserInfo() {
@@ -80,9 +100,8 @@ export const useGlobalStore = defineStore({
       // 将导航侧边栏存起来
       if(menuData && menuStatus === 0) {
         const newMenuData = resetRouterLeft(menuData);
-        console.log(newMenuData, "----");
-        this.menuRoutes = menuData;
-        localStorage.setItem(leftMenuRoutersVar, JSON.stringify(menuData));
+        this.menuRoutes = newMenuData;
+        localStorage.setItem(leftMenuRoutersVar, JSON.stringify(newMenuData));
       };
 
       return requestAll;
