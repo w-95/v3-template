@@ -1,6 +1,7 @@
 <template>
     <div class="login-box">
-        <!-- <canvas id="grid-wave-box"></canvas> -->
+        <img src="@/assets/images/logo-left.png" class="login-left-bgc" />
+        <img src="@/assets/images/logo-right.png" class="login-right-bgc" />
         <div class="login">
             <img src="@/static/images/logo.png" />
             <div class="title">{{ $t(`loginForm.title`) }}</div>
@@ -16,12 +17,26 @@
     position: relative;
     width: 100%;
     height: 100%;
-    background: linear-gradient(to right bottom, #343f5f, #131b35 40%);
-    background-image: url("@/static/images/login-bgc.png");
     background-size: 100% 100%;
     display: flex;
     align-items: center;
     justify-content: center;
+
+    .login-left-bgc{
+        position: absolute;
+        width: 780px;
+        height: 765px;
+        top: 0;
+        left: 0;
+    }
+
+    .login-right-bgc {
+        position: absolute;
+        width: 800px;
+        height: 100%;
+        top: 0;
+        right: 0;
+    }
 
     .login{
         width: 31.25vw;
@@ -45,21 +60,5 @@
             margin-top: .83vw;
         }
     }
-}
-
-.login-box::before{
-    position: absolute;
-    content: " ";
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(0deg, rgba(0, 0, 200, 0.6), rgba(0, 0, 200, 0));
-}
-
-.login-box::after {
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(240deg, rgba(150, 50, 50, 0.6), rgba(0, 0, 200, 0));
 }
 </style>
