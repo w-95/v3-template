@@ -3,7 +3,7 @@
         <!-- <canvas id="grid-wave-box"></canvas> -->
         <div class="login">
             <img src="@/static/images/logo.png" />
-            <div class="title">Robot Management Platform</div>
+            <div class="title">{{ $t(`loginForm.title`) }}</div>
             <router-view></router-view>
        </div>
     </div>

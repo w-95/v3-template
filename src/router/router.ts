@@ -9,7 +9,7 @@ const routes: RouteRecordRaw[] = [
     name: 'Index',
     meta: {
       title: '首页',
-      keepAlive: true,
+      keepAlive: false,
       requireAuth: true,
       transition: "fade"
     },

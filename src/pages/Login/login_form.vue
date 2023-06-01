@@ -2,14 +2,14 @@
     <el-form :model="ruleForm" ref="subRefs" :rules="rules" class="login-form"
         @keyup.enter.native="submitForm">
         <el-form-item class="user-item" prop="username">
-            <el-input placeholder="请输入您的手机号" v-model="ruleForm.username" class="user-ipt">
+            <el-input :placeholder="$t(`loginForm.userNamePlayholder`)" v-model="ruleForm.username" class="user-ipt">
                 <div slot="prefix" class="user-prefix">
                     <img src="@/static/images/username-icon.png" />
                 </div>
             </el-input>
         </el-form-item>
         <el-form-item class="pwd-item" prop="password">
-            <el-input placeholder="请输入您的登录密码" v-model="ruleForm.password" show-password class="pwd-ipt">
+            <el-input :placeholder="$t(`loginForm.passwordPlayholder`)" v-model="ruleForm.password" show-password class="pwd-ipt">
                 <div slot="prefix" class="pwd-prefix">
                     <img src="@/static/images/password-icon.png" />
                 </div>
@@ -28,6 +28,7 @@ import { ElMessage } from 'element-plus/lib/components/index.js';
 // import { Input } from 'element-plus/lib/components/input';
 import { useGlobalStore } from '@/store/global';
 import pinia from "@/store/store";
+import { useI18n } from 'vue-i18n';
 
 import type { ElFormRef } from "../../../typings/element-plus.d.ts";
 
@@ -36,6 +37,7 @@ export default {
         const subRefs = ref<ElFormRef>();
         const globalStore = useGlobalStore(pinia);
         const router = useRouter();
+        const { t } = useI18n();
 
         const ruleForm = reactive({
             username: "",
@@ -43,10 +45,10 @@ export default {
         });
         const rules = reactive({
             username: [
-                { required: true, message: '请输入手机号码', trigger: 'blur' }
+                { required: true, message: t(`loginForm.userErrorTips`), trigger: 'blur' }
             ],
             password: [
-                { required: true, message: '请输入密码', trigger: 'blur' }
+                { required: true, message: t(`loginForm.pwdErrTips`), trigger: 'blur' }
             ]
         });
 

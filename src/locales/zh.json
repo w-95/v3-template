@@ -50,5 +50,12 @@
         "themes": "主题"
     },
     "systemTitle": "机器人管理",
-    "logOut": "退出登录"
+    "logOut": "退出登录",
+    "loginForm": {
+        "title": "智能机器人管理平台",
+        "userNamePlayholder": "请输入您的手机号",
+        "userErrorTips": "请输入手机号码",
+        "passwordPlayholder": "请输入您的登录密码",
+        "pwdErrTips": "请输入密码"
+    }
 }

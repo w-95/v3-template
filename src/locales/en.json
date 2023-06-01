@@ -50,5 +50,12 @@
         "themes": "Themes"
     },
     "systemTitle": "Robot management",
-    "logOut": "Log out"
+    "logOut": "Log out",
+    "loginForm": {
+        "title": "Robot Management Platform",
+        "userNamePlayholder": "Please enter your phone number",
+        "userErrorTips": "Enter your phone number",
+        "passwordPlayholder": "Please enter your login password",
+        "pwdErrTips": "Please enter password"
+    }
 }

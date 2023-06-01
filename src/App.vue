@@ -56,6 +56,10 @@
     box-shadow: 0 0 0 0px var(--el-input-border-color,var(--el-border-color)) inset;
 }
 
+.user-ipt .el-input__inner, .pwd-ipt .el-input__inner{
+  color: #FFF;
+}
+
 .user-ipt .el-input__inner::placeholder, .pwd-ipt .el-input__inner::placeholder {
   color: #FFF;
 }

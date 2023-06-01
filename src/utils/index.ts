@@ -1,4 +1,6 @@
 import { MenuListT } from '@/interface/menu';
+import { widthUi } from "@/data/index";
+
 
 type parsedT = {
   [x: string]: any;
@@ -147,3 +149,8 @@ export const resetRouterLeft = (routers: MenuListT) => {
     return item;
   });
 };
+
+/** px 转 vw*/
+export const px2vw = (px: number): string => {
+  return (px / widthUi) * 100 + 'vw';
+}

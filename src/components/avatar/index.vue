@@ -1,6 +1,6 @@
 <template>
     <div>
-        <div class="avatar-box animate__animated animate__fadeIn" :style="{ 'background': bgColor, 'color': fontColor, 'width': width + 'px', 'height': height + 'px' }">{{ userName }}</div>
+        <div class="avatar-box animate__animated animate__fadeIn" :style="style">{{ userName }}</div>
         <!-- <el-avatar v-else shape="square" :size="100" :fit="fit" :src="src" /> -->
     </div>
 </template>
@@ -9,6 +9,7 @@
 
 import { onMounted, ref } from "vue";
 import { stringToColor, getContrastingColor } from "@/utils/index";
+import { px2vw } from "@/utils/index";
 
 export default ({
     props: {
@@ -64,12 +65,16 @@ export default ({
             };
         });
 
+        let style = `
+            background: ${bgColor.value}; 
+            color: ${fontColor.value}; 
+            width: ${px2vw(props.width)}; 
+            height: ${px2vw(props.height)} 
+        `;
+
         return {
-            bgColor,
-            fontColor,
-            userName,
-            width: props.width,
-            height: props.height
+            style,
+            userName
         }
     }
 })
@@ -81,7 +86,7 @@ export default ({
 
 <style scoped lang="scss">
 .avatar-box {
-    font-size: var(--el-avatar-text-size);
+    font-size: 18px;
     border-radius: 8px;
     text-align: center;
     display: flex;
