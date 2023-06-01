@@ -5,7 +5,9 @@ declare module 'vue-router' {
         isAdmin?: boolean
         requireAuth: boolean
         transition?: string,
-        keepAlive?: boolean
-        title?: string
+        transitionOut?: string,
+        keepAlive?: boolean,
+        title?: string,
+        mode?: 'default' | 'out-in' | 'in-out'
     }
 }

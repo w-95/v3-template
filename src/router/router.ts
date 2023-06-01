@@ -11,14 +11,20 @@ const routes: RouteRecordRaw[] = [
       title: '首页',
       keepAlive: false,
       requireAuth: true,
-      transition: "fade"
+      transition: "animate__animated animate__fadeIn",
+      transitionOut: "animate__animated animate__fadeOut"
     },
     component: () => import('@/pages/index.vue'),
     children: [
       {
         path: '',
         name: 'Console',
-        meta: { transition: "fade", requireAuth: true },
+        meta: { 
+          transition: "animate__animated animate__fadeIn",
+          transitionOut: "animate__animated animate__fadeOut",
+          requireAuth: true, 
+          mode: "out-in" 
+        },
         component: () => import('@/pages/Console/index.vue'),
       }
     ]
@@ -28,22 +34,34 @@ const routes: RouteRecordRaw[] = [
     name: 'Login',
     meta: {
       title: '登录',
-      keepAlive: true,
+      keepAlive: false,
       requireAuth: false,
-      transition: "fade"
+      transition: "animate__animated animate__fadeIn",
+      transitionOut: "animate__animated animate__fadeOut",
+      mode: "out-in"
     },
     component: () => import('@/pages/Login/index.vue'),
     children: [
       {
         path: '',
         name: 'LoginFirm',
-        meta: { transition: "fade", requireAuth: false },
+        meta: { 
+          transition: "animate__animated animate__fadeIn",
+          transitionOut: "animate__animated animate__fadeOut",
+          mode: "out-in", 
+          requireAuth: false 
+        },
         component: () => import('@/pages/Login/login_form.vue'),
       },
       {
         path: '/forgotpwd',
         name: 'ForgotPassword',
-        meta: { transition: "fade", requireAuth:  false },
+        meta: { 
+          transition: "animate__animated animate__fadeIn",
+          transitionOut: "animate__animated animate__fadeOut",
+          mode: "out-in", 
+          requireAuth:  false 
+        },
         component: () => import('@/pages/Login/forgot_password.vue'),
       },
     ],

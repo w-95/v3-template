@@ -5,8 +5,11 @@
 <template>
   <div id="app-root">
     <router-view v-slot="{ Component, route }">
-      <transition :name="route.meta.transition || 'fade'">
-        <component :is="Component" class="animate__animated animate__fadeIn" />
+      <transition
+        :duration="500"
+        :enter-active-class="route.meta.transition"
+        :leave-active-class="route.meta.transitionOut">
+        <component :is="Component" />
       </transition>
     </router-view>
   </div>
@@ -62,5 +65,9 @@
 
 .user-ipt .el-input__inner::placeholder, .pwd-ipt .el-input__inner::placeholder {
   color: #FFF;
+}
+
+.root-right-container-main-box .animate__animated{
+    animation-duration: 0s
 }
 </style>

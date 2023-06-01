@@ -31,13 +31,16 @@ export const useGlobalStore = defineStore({
     // 校验是否登录
     checkAuth() {
       const loginToken = jsCookie.get(loginTokenVar);
-      if(loginToken && (this.menuRoutes as any).length > 0) {
-        this.isAuth = true;
+      this.isAuth = true;
         return true;
-      }else {
-        this.isAuth = false;
-        return false;
-      };
+      // if(loginToken && (this.menuRoutes as any).length > 0) {
+      //   this.isAuth = true;
+      //   return true;
+      // }else {
+        
+      //   this.isAuth = false;
+      //   return false;
+      // };
     },
 
     // 登录

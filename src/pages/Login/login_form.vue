@@ -64,7 +64,7 @@ export default {
                             ElMessage.error(msg);
                             return;
                         };
-                        router.push({ name: "Console"});
+                        router.push({ path: "/"});
                         return;
                     };
                     ElMessage.error(msg? msg: '获取Token异常!');
