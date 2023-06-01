@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router';
 
-import { useGlobalStore } from '@/store/global';
 import pinia from "@/store/store";
+import Login from "@/pages/Login/index.vue";
 
 const routes: RouteRecordRaw[] = [
   {
@@ -11,8 +11,9 @@ const routes: RouteRecordRaw[] = [
       title: '首页',
       keepAlive: false,
       requireAuth: true,
-      transition: "animate__animated animate__fadeIn",
-      transitionOut: "animate__animated animate__fadeOut"
+      transition: "animate__animated animate__fadeIn animate-custom-duration",
+      transitionOut: "animate__animated animate__fadeOut animate-custom-duration",
+      mode: "out-in" 
     },
     component: () => import('@/pages/index.vue'),
     children: [
@@ -20,8 +21,8 @@ const routes: RouteRecordRaw[] = [
         path: '',
         name: 'Console',
         meta: { 
-          transition: "animate__animated animate__fadeIn",
-          transitionOut: "animate__animated animate__fadeOut",
+          transition: "animate__animated animate__fadeIn animate-custom-duration",
+          transitionOut: "animate__animated animate__fadeOut animate-custom-duration",
           requireAuth: true, 
           mode: "out-in" 
         },
@@ -36,18 +37,18 @@ const routes: RouteRecordRaw[] = [
       title: '登录',
       keepAlive: false,
       requireAuth: false,
-      transition: "animate__animated animate__fadeIn",
-      transitionOut: "animate__animated animate__fadeOut",
+      transition: "animate__animated animate__fadeIn animate-custom-duration-03",
+      transitionOut: "animate__animated animate__fadeOut animate-custom-duration-03",
       mode: "out-in"
     },
-    component: () => import('@/pages/Login/index.vue'),
+    component: Login,
     children: [
       {
         path: '',
         name: 'LoginFirm',
         meta: { 
-          transition: "animate__animated animate__fadeIn",
-          transitionOut: "animate__animated animate__fadeOut",
+          transition: "animate__animated animate__fadeIn animate-custom-duration-03",
+          transitionOut: "animate__animated animate__fadeOut animate-custom-duration-0",
           mode: "out-in", 
           requireAuth: false 
         },
@@ -57,8 +58,8 @@ const routes: RouteRecordRaw[] = [
         path: '/forgotpwd',
         name: 'ForgotPassword',
         meta: { 
-          transition: "animate__animated animate__fadeIn",
-          transitionOut: "animate__animated animate__fadeOut",
+          transition: "animate__animated animate__fadeIn animate-custom-duration",
+          transitionOut: "animate__animated animate__fadeOut animate-custom-duration",
           mode: "out-in", 
           requireAuth:  false 
         },
@@ -73,10 +74,11 @@ const router = createRouter({
   routes,
 });
 
-const globalStore = useGlobalStore(pinia);
+import { useGlobalStore } from '@/store/global';
+
 
 router.beforeEach((to , from , next) => {
-
+  const globalStore = useGlobalStore(pinia);
   if (to.meta.requireAuth && !globalStore.checkAuth()) {
     router.push({ name: "LoginFirm"});
   };

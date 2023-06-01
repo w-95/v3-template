@@ -39,6 +39,8 @@ if(!LOCAL_THEME) {
 
 if( LOCAL_LOGIN_TOKEN && LOCAL_USERINFO && LOCAL_MENUROUES) {
 
+    globalStore.token = LOCAL_LOGIN_TOKEN;
+
     // 同步用户信息
     globalStore.userInfo = JSON.parse(LOCAL_USERINFO);
 

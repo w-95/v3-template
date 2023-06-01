@@ -24,23 +24,21 @@ export const useGlobalStore = defineStore({
   },
 
   getters: {
-
+    getGlobalLoading( state ) {
+      return state.globalLoading
+    }
   },
 
   actions: {
     // 校验是否登录
     checkAuth() {
-      const loginToken = jsCookie.get(loginTokenVar);
+      if(!this.token || (this.menuRoutes as any).length < 0) {
+        this.isAuth = false;
+        return false;
+      };
+
       this.isAuth = true;
-        return true;
-      // if(loginToken && (this.menuRoutes as any).length > 0) {
-      //   this.isAuth = true;
-      //   return true;
-      // }else {
-        
-      //   this.isAuth = false;
-      //   return false;
-      // };
+      return true;
     },
 
     // 登录
@@ -50,6 +48,7 @@ export const useGlobalStore = defineStore({
       const { data, status } = result;
 
       if(data && status === 0) {
+        this.token = data;
         jsCookie.set(loginTokenVar, data, {
           path: '/',
           domain: window.location.hostname,
@@ -78,10 +77,16 @@ export const useGlobalStore = defineStore({
         // 移除用户信息
         localStorage.removeItem(userInfoVar);
         this.userInfo = null;
+
         // 移除导航侧边栏
         localStorage.removeItem(leftMenuRoutersVar);
         this.menuRoutes = [];
-      }, 3000);
+
+        // 移除token
+        this.token = "";
+
+        this.globalLoading = false;
+      }, 1000);
     },
 
     // 更新用户信息和用户的侧边栏
@@ -110,7 +115,14 @@ export const useGlobalStore = defineStore({
       return requestAll;
     },
 
-    setGlobalLoading(checkLoading: boolean) {
+    setGlobalLoading(checkLoading: boolean, timer: number = 0) {
+      if(Boolean(timer)) {
+        setTimeout(() => {
+          this.globalLoading = checkLoading;
+        }, timer);
+        return;
+      };
+
       this.globalLoading = checkLoading;
     },
   },

@@ -1,19 +1,26 @@
-<script setup lang="ts">
 
-</script>
 
 <template>
   <div id="app-root">
-    <router-view v-slot="{ Component, route }">
+
+    <GlobalLoading></GlobalLoading>
+
+    <router-view v-slot="{ Component, route }" class="test">
       <transition
-        :duration="500"
+        :duration="0"
+        :mode="route.meta.mode"
         :enter-active-class="route.meta.transition"
         :leave-active-class="route.meta.transitionOut">
         <component :is="Component" />
       </transition>
     </router-view>
+
   </div>
 </template>
+
+<script setup lang="ts">
+import GlobalLoading from "@/components/globalLoading/index.vue";
+</script>
 
 <style lang="scss">
 .test-color {
@@ -67,7 +74,23 @@
   color: #FFF;
 }
 
-.root-right-container-main-box .animate__animated{
-    animation-duration: 0s
+.animate-custom-duration {
+  animation-duration: .3s;
+}
+
+.animate-custom-duration-0{
+  animation-duration: 0s;
+}
+
+.animate-custom-duration-01{
+  animation-duration: .1s;
+}
+
+.animate-custom-duration-02{
+  animation-duration: .2s;
+}
+
+.animate-custom-duration-03{
+  animation-duration: .3s;
 }
 </style>
