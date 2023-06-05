@@ -69,7 +69,7 @@ export default defineConfig({
     https: false,
     proxy: {
       '/web_fe_api': {
-        target: 'https://x.droid.ac.cn/robotcloud_backend',
+        target: 'https://w.droid.ac.cn/businessUser',
         changeOrigin: true,
         secure: false,
         rewrite: (path) => path.replace(/^\/web_fe_api/, ''),

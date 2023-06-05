@@ -1,21 +1,26 @@
 <template>
     <el-menu-item :index="index" :class="[`bottom-ment-item-${index}`]">
         <el-icon v-if="isShowIcon">
-            <icon :path-name="title" />
+            <Icon :path-name="iconName" />
         </el-icon>
-        <template #title>{{ title }}</template>
+        <template #title>{{ getTitle($t(`menuLeft.${title}`)) }}</template>
     </el-menu-item>
 </template>
 
 <script lang="ts" setup>
 import { defineProps } from 'vue';
+import { useI18n } from 'vue-i18n';
 
-import icon from "./icon.vue";
+import Icon from "./icon.vue";
 
 const props = defineProps({
     index: {
         type: String,
         default: ''
+    },
+    iconName: {
+        type: String,
+        default: ""
     },
     title: {
         type: String,
@@ -27,12 +32,22 @@ const props = defineProps({
     }
 });
 
+const { tm } = useI18n();
+
 const { index, title } = props;
+
+const getTitle = ( lTitle: string ) => {
+    const obj: any = tm('menuLeft');
+
+    if(title && obj[title]) {
+        return lTitle
+    };
+    return title;
+};
 
 </script>
 
 <style scoped lang="scss">
-
 .bottom-ment-item-1{
     top: 0px;
     left: 0;

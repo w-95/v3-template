@@ -4,7 +4,7 @@
             <el-icon>
                 <Themes-icon />
             </el-icon>
-            <span>{{ title }}</span>
+            <span>{{ $t('menuLeft.' + title) }}</span>
         </template>
 
         <el-menu-item-group class="bottom-ment-item-9-sub">

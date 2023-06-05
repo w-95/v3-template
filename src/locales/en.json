@@ -3,46 +3,23 @@
         "prodMgmt": {
             "name": "Product management",
             "child": {
-                "pordList": "Product list",
-                "logRecords": "log capture records",
-                "customRes": "bespoke resources",
-                "devList": "equipment list"
-            }
-        },
-        "disRobot": {
-            "name": "disinfection robot",
-            "child": {
-                "STS": "Scheduled task statistics",
-                "WM": "warning messages"
+                "pordList": "Product list"
             }
         },
         "DR": {
             "name": "delivery robot",
             "child": {
-                "ODS": "order delivery statistics",
-                "HDL": "Help Delivery List",
-                "WM": "warning messages",
-                "MD": "Master Data",
-                "callList": "Call list",
-                "AS": "Abnormality statistics"
-            }
-        },
-        "versionC": {
-            "name": "Version Control",
-            "child": {
-                "vList": "Version list"
-            }
-        },
-        "CRM": {
-            "name": "Customer management",
-            "child": {
-                "CustomerList": "Customer List"
+                "MyOrder": "My Order",
+                "DS": "Delivery Statistics",
+                "HDL": "Help Delivery List"
             }
         },
         "UC": {
             "name": "Account Center",
             "child": {
-                "privacy": "Privacy"
+                "privacy": "Privacy",
+                "personal": "personal address book",
+                "business": "business address book"
             }
         },
         "mSetting": "Multiple settings",
@@ -51,6 +28,7 @@
     },
     "systemTitle": "Robot management",
     "logOut": "Log out",
+    "systemName": "AI Robot MP",
     "loginForm": {
         "title": "Robot Management Platform",
         "userNamePlayholder": "Please enter your phone number",

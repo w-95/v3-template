@@ -143,6 +143,18 @@ export const resetRouterLeft = (routers: MenuListT) => {
       case '个人中心':
         item.lang = 'privacy';
         break;
+      case '我的订单':
+        item.lang = 'MyOrder';
+        break;
+      case '配送统计':
+        item.lang = 'DS';
+        break;
+      case '个人地址簿':
+        item.lang = 'personal';
+        break;
+      case '企业地址簿':
+        item.lang = 'business';
+        break;
       default:
         break;
     };

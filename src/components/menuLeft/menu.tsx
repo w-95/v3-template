@@ -8,6 +8,9 @@ import { MenuListT } from '@/interface/menu';
 import ElSubMenu from './elSubMenu.vue';
 import ElMenuItem from './elMenuItem.vue';
 import SettingSubMenu from "./settingSubMenu.vue";
+import MenuItemHeader from './menuItemHeader.vue';
+
+import { useI18n } from 'vue-i18n';
 
 import "./menu.scss";
 
@@ -20,6 +23,8 @@ export default defineComponent({
     const handleOpen = () => {};
     
     const handleClose = () => {};
+
+    const { t } = useI18n();
     
     const setIsCollapse = () => {
       isCollapse.value = !isCollapse.value;
@@ -33,7 +38,7 @@ export default defineComponent({
         <ElMenu default-active="2" class="el-menu-vertical-demo" style={style.value}
             collapse={isCollapse.value} onOpen={handleOpen} onClose={handleClose}>
 
-            <ElMenuItem index='1' title="" class="bottom-menu-item-first"></ElMenuItem>
+            <MenuItemHeader index='1' class="bottom-menu-item-first"></MenuItemHeader>
 
             {(globalStore.menuRoutes as Array<MenuListT[]>).map((item: any, index) => {
               if (item.child) {
@@ -47,9 +52,9 @@ export default defineComponent({
 
             <ElMenuItem index='10' title='SETTINGS' isShowIcon={false}></ElMenuItem>
 
-            <ElMenuItem index='8' title='Settings'></ElMenuItem>
+            <ElMenuItem index='8' title='setting' iconName="setting"></ElMenuItem>
 
-            <SettingSubMenu index='9' title="Themes"></SettingSubMenu>
+            <SettingSubMenu index='9' title='themes'></SettingSubMenu>
 
             <el-menu-item index='11' class="bottom-menu-item-last" onClick={setIsCollapse}>
               <el-icon>
