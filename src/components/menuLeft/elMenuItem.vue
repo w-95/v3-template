@@ -53,8 +53,10 @@ const getTitle = ( lTitle: string ) => {
     left: 0;
     width: 100%;
 }
-.bottom-ment-item-10{
+.bottom-ment-item-100{
     font-weight: bold;
     margin-top: 250px;
 }
+
+
 </style>

@@ -24,7 +24,8 @@
         },
         "mSetting": "Multiple settings",
         "setting": "Settings",
-        "themes": "Themes"
+        "themes": "Themes",
+        "console": "console"
     },
     "systemTitle": "Robot management",
     "logOut": "Log out",

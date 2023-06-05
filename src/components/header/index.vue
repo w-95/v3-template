@@ -1,6 +1,8 @@
 <template>
     <div>
-        <span class="header-logo-text">{{ $t(`systemTitle`) }}</span>
+        <div class="header-nav-box">
+            <NavHeader></NavHeader>
+        </div>
 
         <div class="header-right">
             <!-- 中英文切换 -->
@@ -29,6 +31,7 @@ import { computed } from 'vue';
 
 import Avatar from "@/components/avatar/index.vue";
 import Account from "@/components/account/index.vue";
+import NavHeader from "@/components/navHeader/index.vue";
 
 import { useGlobalStore } from '@/store/global';
 import { useLocaleStore } from '@/store/locales';

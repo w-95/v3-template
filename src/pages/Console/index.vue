@@ -1,6 +1,6 @@
 <template>
   <div class="console-box animate__backInDown animate__animated">
-    <div>大家好 hello word</div>
+    <div></div>
   </div>
 </template>
 

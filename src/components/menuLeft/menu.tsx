@@ -10,8 +10,6 @@ import ElMenuItem from './elMenuItem.vue';
 import SettingSubMenu from "./settingSubMenu.vue";
 import MenuItemHeader from './menuItemHeader.vue';
 
-import { useI18n } from 'vue-i18n';
-
 import "./menu.scss";
 
 export default defineComponent({
@@ -23,8 +21,6 @@ export default defineComponent({
     const handleOpen = () => {};
     
     const handleClose = () => {};
-
-    const { t } = useI18n();
     
     const setIsCollapse = () => {
       isCollapse.value = !isCollapse.value;
@@ -40,23 +36,27 @@ export default defineComponent({
 
             <MenuItemHeader index='1' class="bottom-menu-item-first"></MenuItemHeader>
 
+            <ElMenuItem index='2' title='console' iconName="console"></ElMenuItem>
+
             {(globalStore.menuRoutes as Array<MenuListT[]>).map((item: any, index) => {
               if (item.child) {
                 return (
-                  <ElSubMenu index={index + 2 + ''} title={item.name} subMenuChild={item.child} lang={item.lang}></ElSubMenu>
+                  <ElSubMenu index={index + 3 + ''} title={item.name} subMenuChild={item.child} lang={item.lang}></ElSubMenu>
                 );
               } else {
-                return <ElMenuItem index={index + 2 + ''} title={item.name}></ElMenuItem>;
+                return <ElMenuItem index={index + 3 + ''} title={item.name}></ElMenuItem>;
               }
             })}
 
-            <ElMenuItem index='10' title='SETTINGS' isShowIcon={false}></ElMenuItem>
+            <ElMenuItem index='100' title='SETTINGS' isShowIcon={false}></ElMenuItem>
 
-            <ElMenuItem index='8' title='setting' iconName="setting"></ElMenuItem>
+            <ElMenuItem index={globalStore.menuRoutes.length + 4} title='setting' iconName="setting"></ElMenuItem>
 
-            <SettingSubMenu index='9' title='themes'></SettingSubMenu>
+            <SettingSubMenu index={globalStore.menuRoutes.length + 5} title='themes'></SettingSubMenu>
 
-            <el-menu-item index='11' class="bottom-menu-item-last" onClick={setIsCollapse}>
+            <ElMenuItem index={globalStore.menuRoutes.length + 98} title='' iconName=""></ElMenuItem>
+
+            <el-menu-item index='99' class={ !isCollapse.value ? 'bottom-menu-item-last': 'bottom-menu-item-last-shou'} onClick={setIsCollapse}>
               <el-icon>
                 {
                   isCollapse.value? <span class="icon iconfont zhankai-you zhy">&#xe635;</span> :
@@ -65,7 +65,6 @@ export default defineComponent({
               </el-icon>
             </el-menu-item >
         </ElMenu>
-        
     );
   },
 });

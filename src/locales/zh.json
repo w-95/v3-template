@@ -24,7 +24,8 @@
         },
         "mSetting": "Multiple settings",
         "setting": "设置",
-        "themes": "主题"
+        "themes": "主题",
+        "console": "控制台"
     },
     "systemTitle": "机器人管理",
     "logOut": "退出登录",
