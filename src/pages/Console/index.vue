@@ -1,6 +1,6 @@
 <template>
   <div class="console-box animate__backInDown animate__animated">
-    <div></div>
+    <div>123</div>
   </div>
 </template>
 
