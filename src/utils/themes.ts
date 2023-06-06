@@ -88,7 +88,7 @@ export default {
     // menu el-sub-menu__title
     '--el-sub-menu-bg': '#FFF',
     // 根下的右侧container
-    '--el-root-right-container-bg': '#FFF',
+    '--el-root-right-container-bg': '#F0F1F5',
     // 整体内容card的背景色
     '--el-main-bg-color': '#F0F1F5'
   },
