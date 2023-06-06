@@ -6,10 +6,15 @@ import path from 'path';
 import viteCompression from 'vite-plugin-compression';
 import vueJsx from "@vitejs/plugin-vue-jsx";
 
+import PkgConfig from 'vite-plugin-package-config';
+import OptimizationPersist from 'vite-plugin-optimize-persist';
+
 // https://vitejs.dev/config/
 export default defineConfig({
   base: './',
   plugins: [
+    PkgConfig(),
+    OptimizationPersist(),
     vue(),
     viteCompression({
       verbose: true,

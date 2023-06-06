@@ -16,7 +16,7 @@
 </template>
 
 <script lang="ts" setup>
-import { PropType, defineProps } from 'vue';
+import { PropType } from 'vue';
 import { MenuT } from '@/interface/menu';
 
 import icon from "./icon.vue";

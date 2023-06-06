@@ -4,6 +4,8 @@ import jsCookie from "js-cookie";
 
 import router from "@/router/router";
 
+import { useOnline } from '@vueuse/core'
+
 import { singin, getUserInfo, getMenuRoute } from "@/request/user.ts";
 import { loginParamT } from "@/interface/apiParams.ts";
 import { UserInfoT } from "@/interface/user.ts";
@@ -19,7 +21,8 @@ export const useGlobalStore = defineStore({
       menuRoutes: [] as unknown as MenuListT | [],
       globalLoading: false,
       isAuth: false,
-      token: ""
+      token: "",
+      netWork: useOnline()
     }
   },
 

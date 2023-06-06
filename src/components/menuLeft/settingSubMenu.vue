@@ -28,7 +28,7 @@
 </template>
 
 <script lang="ts" setup>
-import { defineProps, onMounted, Ref, ref } from 'vue';
+import { onMounted, Ref, ref } from 'vue';
 
 import { Check, Close } from '@element-plus/icons-vue';
 

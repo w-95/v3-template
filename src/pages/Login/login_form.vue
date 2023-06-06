@@ -4,14 +4,14 @@
         <el-form-item class="user-item" prop="username">
             <el-input :placeholder="$t(`loginForm.userNamePlayholder`)" v-model="ruleForm.username" class="user-ipt">
                 <div slot="prefix" class="user-prefix">
-                    <img src="@/static/images/username-icon.png" />
+                    <img src="@/assets/images/username-icon.png" />
                 </div>
             </el-input>
         </el-form-item>
         <el-form-item class="pwd-item" prop="password">
             <el-input :placeholder="$t(`loginForm.passwordPlayholder`)" v-model="ruleForm.password" show-password class="pwd-ipt">
                 <div slot="prefix" class="pwd-prefix">
-                    <img src="@/static/images/password-icon.png" />
+                    <img src="@/assets/images/password-icon.png" />
                 </div>
             </el-input>
         </el-form-item>
@@ -89,7 +89,7 @@ export default {
     width: 100%;
     height: 100%;
     // background: linear-gradient(to right bottom, #343f5f, #131b35 40%);
-    background-image: url("@/static/images/login-bgc.png");
+    // background-image: url("@/static/images/login-bgc.png");
     background-size: 100% 100%;
     display: flex;
     align-items: center;

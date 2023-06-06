@@ -77,7 +77,7 @@ const router = createRouter({
 import { useGlobalStore } from '@/store/global';
 
 
-router.beforeEach((to , from , next) => {
+router.beforeEach((to , _from, next) => {
   const globalStore = useGlobalStore(pinia);
   if (to.meta.requireAuth && !globalStore.checkAuth()) {
     router.push({ name: "LoginFirm"});

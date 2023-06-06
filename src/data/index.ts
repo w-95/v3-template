@@ -23,4 +23,27 @@ export const accounts = [{
     isDisplay: false,
     titleKey: 'logOut',
     type: "logOut"
+}];
+
+// console page header card
+export const consoleHeaderCard = [{
+    topTitle: "消毒任务总量",
+    bottmTitle: "本周消毒量",
+    topCount: 0,
+    bottomCount: 0,
+    avatar: "/src/assets/images/index1.png"
+},{
+    topTitle: "配送订单总量",
+    bottmTitle: "本周配送订单量",
+    topCount: 0,
+    bottomCount: 0,
+    avatar: "/src/assets/images/index2.png"
+},{
+    topTitle: "机器人数量",
+    topCount: 0,
+    avatar: "/src/assets/images/index3.png"
+},{
+    topTitle: "用户数量",
+    topCount: 0,
+    avatar: "/src/assets/images/index4.png"
 }]

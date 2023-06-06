@@ -152,7 +152,7 @@ const closeLoading = (_options: { loading: boolean }) => {
 const httpErrorStatusHandle = (error: any) => {
   if (axios.isCancel(error)) {
     throw '请求的重复请求：' + error.message;
-  }
+  };
 
   let message = '';
 
@@ -207,7 +207,9 @@ const httpErrorStatusHandle = (error: any) => {
   }
   if (error.message.includes('Network')) {
     message = window.navigator.onLine ? '服务端异常！' : '您断网了！';
-  }
+  };
+
+  console.log(message)
 };
 
 export default reAxios;

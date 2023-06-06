@@ -1,7 +1,8 @@
 import { createApp } from 'vue';
 import elementPlus from 'element-plus';
 import jsCookie from "js-cookie";
-import i18n from '@/locales'
+import i18n from '@/locales';
+import "@/utils/prototype";
 import 'element-plus/dist/index.css';
 
 import '@/assets/fonts/iconfont.css';

@@ -19,9 +19,10 @@
 </template>
 
 <script lang="ts" setup>
-import { watch, ref } from 'vue';
+import { ref } from 'vue';
 import { ArrowRight } from "@element-plus/icons-vue";
 import { useRoute, useRouter } from "vue-router";
+import { watchDeep } from '@vueuse/core'
 
 const route = useRoute();
 const router = useRouter();
@@ -34,7 +35,7 @@ const getBreadcrumbData = () => {
   );
 };
 
-watch(route, () => {
+watchDeep(route, () => {
   getBreadcrumbData()
 }, { immediate: true });
 
