@@ -18,8 +18,8 @@ export default ({
             default: "square"
         },
         size: {
-            type: Number || String,
-            default: 'default'
+            type: Number,
+            default: 40
         },
         fit: {
             type: String,

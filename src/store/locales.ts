@@ -7,8 +7,7 @@ export const useLocaleStore = defineStore( 'locale', () => {
     let locale = ref(i18n.global.locale.value);
 
     // 设置locale
-    function setLocale(lang: string) {
-      console.log(lang)
+    function setLocale(lang: "zh" | "en") {
       locale.value = lang;
       i18n.global.locale.value = lang;
       localStorage.setItem(localeVar, lang);

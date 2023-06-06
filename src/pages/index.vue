@@ -29,6 +29,12 @@
 import Header from "@/components/header/index.vue";
 import LeftMenu from '@/components/menuLeft/index.vue';
 
+import { useGlobalStore } from '@/store/global';
+
+const globalStore = useGlobalStore();
+
+globalStore.setGlobalLoading(false, 500);
+
 </script>
 
 <style scoped lang="scss">

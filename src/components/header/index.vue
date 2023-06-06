@@ -41,7 +41,7 @@ const localStore = useLocaleStore();
 
 const userInfo = globalStore.userInfo;
 
-const checkLang = (lang: string) => {
+const checkLang = (lang: "zh" | "en") => {
   localStore.setLocale(lang);
 };
 

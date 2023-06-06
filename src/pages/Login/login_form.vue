@@ -65,7 +65,6 @@ export default {
                             return;
                         };
                         router.push({ path: "/"});
-                        globalStore.setGlobalLoading(false, 1000);
                         return;
                     };
                     ElMessage.error(msg? msg: '获取Token异常!');

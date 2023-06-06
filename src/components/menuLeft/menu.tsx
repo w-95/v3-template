@@ -50,11 +50,11 @@ export default defineComponent({
 
             <ElMenuItem index='100' title='SETTINGS' isShowIcon={false}></ElMenuItem>
 
-            <ElMenuItem index={globalStore.menuRoutes.length + 4} title='setting' iconName="setting"></ElMenuItem>
+            <ElMenuItem index={globalStore.menuRoutes.length + 4 + ''} title='setting' iconName="setting"></ElMenuItem>
 
-            <SettingSubMenu index={globalStore.menuRoutes.length + 5} title='themes'></SettingSubMenu>
+            <SettingSubMenu index={globalStore.menuRoutes.length + 5 + ''} title='themes'></SettingSubMenu>
 
-            <ElMenuItem index={globalStore.menuRoutes.length + 98} title='' iconName=""></ElMenuItem>
+            <ElMenuItem index={globalStore.menuRoutes.length + 98 + ''} title='' iconName=""></ElMenuItem>
 
             <el-menu-item index='99' class={ !isCollapse.value ? 'bottom-menu-item-last': 'bottom-menu-item-last-shou'} onClick={setIsCollapse}>
               <el-icon>

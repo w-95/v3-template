@@ -24,7 +24,7 @@ import icon from "./icon.vue";
 const props = defineProps({
     index: {
         type: String,
-        default: '0'
+        default: '1'
     },
     title: {
         type: String,
