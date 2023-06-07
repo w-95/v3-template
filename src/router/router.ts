@@ -2,6 +2,8 @@ import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router';
 
 import pinia from "@/store/store";
 import Login from "@/pages/Login/index.vue";
+import Index from '@/pages/index.vue';
+import Console from '@/pages/Console/index.vue';
 
 const routes: RouteRecordRaw[] = [
   {
@@ -15,7 +17,7 @@ const routes: RouteRecordRaw[] = [
       transitionOut: "animate__animated animate__fadeOut animate-custom-duration",
       mode: "out-in" 
     },
-    component: () => import('@/pages/index.vue'),
+    component: Index,
     children: [
       {
         path: '',
@@ -26,7 +28,7 @@ const routes: RouteRecordRaw[] = [
           requireAuth: true, 
           mode: "out-in" 
         },
-        component: () => import('@/pages/Console/index.vue'),
+        component: Console,
       }
     ]
   },

@@ -12,9 +12,11 @@
   "dependencies": {
     "@intlify/vite-plugin-vue-i18n": "^7.0.0",
     "@types/axios": "^0.14.0",
+    "@types/echarts": "^4.9.18",
     "@types/js-cookie": "^3.0.3",
     "@vueuse/core": "^10.1.2",
     "animate.css": "^4.1.1",
+    "echarts": "^5.4.2",
     "element-plus": "^2.3.4",
     "js-cookie": "^3.0.5",
     "pinia": "^2.0.35",
@@ -42,6 +44,7 @@
     "vite-plugin-compression": "^0.5.1",
     "vite-plugin-optimize-persist": "^0.1.2",
     "vite-plugin-package-config": "^0.1.1",
+    "vue-countup-v3": "^1.2.0",
     "vue-tsc": "^1.4.2"
   }
 }

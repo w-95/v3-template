@@ -1,6 +1,5 @@
 import { MenuListT } from '@/interface/menu';
-import { widthUi } from "@/data/index";
-
+import { widthUi } from '@/data/index';
 
 type parsedT = {
   [x: string]: any;
@@ -157,7 +156,7 @@ export const resetRouterLeft = (routers: MenuListT) => {
         break;
       default:
         break;
-    };
+    }
     return item;
   });
 };
@@ -165,4 +164,73 @@ export const resetRouterLeft = (routers: MenuListT) => {
 /** px 转 vw*/
 export const px2vw = (px: number): string => {
   return (px / widthUi) * 100 + 'vw';
-}
+};
+
+/**
+ * 获取近几月  近几年的总天数
+ * @param { Number } num 几年 或者几月
+ * @param { String } dateName 支持【day, year, month】
+ * @param { Date } startTime 开始时间
+ * @returns
+ */
+export const getDateTime = (num: number, dateName: string, startTime?: string) => {
+  var dateObj: any = {};
+  dateObj.now = startTime == undefined ? new Date() : new Date(startTime);
+  var year = dateObj.now.getFullYear();
+  var month = dateObj.now.getMonth() + 1; //0-11表示1-12月
+  var day = dateObj.now.getDate();
+  var endDate: any;
+  if (dateName == 'day') {
+    endDate = startTime == undefined ? new Date() : new Date(startTime);
+    endDate.setDate(endDate.getDate() - num);
+  }
+  if (dateName == 'year') {
+    endDate = year - num + '/' + month + '/' + day;
+    endDate = new Date(endDate);
+  }
+  if (dateName == 'month') {
+    //n个月前所在月的总天数
+    var lastMonthDay;
+    if (month - num <= 0) {
+      //当近n个月在上一年的时间时
+      lastMonthDay = new Date(year - 1, 12 - (num - month), 0).getDate();
+      if (lastMonthDay < day) {
+        //n个月前所在的总天数小于现在的天日期
+        endDate = year - 1 + '/' + (12 - (num - month)) + '/' + lastMonthDay;
+      } else {
+        endDate = year - 1 + '/' + (12 - (num - month)) + '/' + day;
+      }
+    } else {
+      lastMonthDay = new Date(year, month - num, 0).getDate();
+      if (lastMonthDay < day) {
+        //n个月前所在的总天数小于现在的天日期
+        endDate = year + '/' + (month - num) + '/' + lastMonthDay;
+      } else {
+        endDate = year + '/' + (month - num) + '/' + day;
+      }
+    }
+    endDate = new Date(endDate);
+  }
+  endDate.setDate(endDate.getDate() + 1); //最开始的那天也算一天，所以整体需要减掉1天；
+  dateObj.last = endDate;
+  // 开始时间和结束时间的总的时间天数，+1 是因为本身的那天也算一天
+  dateObj.temp = (dateObj.now.getTime() - dateObj.last.getTime()) / 24 / 60 / 60 / 1000 + 1;
+  return dateObj;
+};
+
+/**
+ * 创建一个a标签 允许它下载
+ * @param params
+ */
+export const createAtag_Downlod = (downloadOrigin: string, params: parsedT):HTMLElement => {
+  let a = document.createElement('a');
+  let keys = Object.keys(params);
+
+  let str = '';
+  for (let i = 0; i < keys.length; i++) {
+    str += '&' + keys[i] + '=' + params[keys[i]];
+  };
+  str = str.replace('&', '?');
+  a.href = downloadOrigin + str;
+  return a;
+};

@@ -1,0 +1,124 @@
+.console-box {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  
+    .header-card-box {
+        width: 100%;
+        height: 260px;
+        display: flex;
+        justify-content: space-between;
+  
+        .item-card {
+            width: 24.2%;
+            height: 100%;
+            border-radius: 16px;
+        }
+    }
+
+    .footer-card-box{
+        flex: 1;
+        display: flex;
+        justify-content: space-between;
+        margin-top: 20px;
+
+        .chart-card /deep/ .el-card__body{
+            position: relative;
+            flex: 1;
+        }
+    
+        .chart-card{
+            width: 49.4%;
+            height: 100%;
+            border-radius: 16px;
+            display: flex;
+
+            #disinfect-chart, #delivery-chart{
+                position: absolute;
+                left: 40px;
+                right: 40px;
+                top: 32px;
+                bottom: 50px;
+                transition: all .3s;
+            }
+
+            .toolbox{
+                position: absolute;
+                top: 70px;
+                right: 32px;
+                box-sizing: border-box;
+                display: flex;
+                justify-content: space-between;
+
+                .select-tool {
+                    max-width: 120px;
+                    min-width: 100px;
+                    margin-right: 10px;
+                  }
+            }
+        }
+    }
+}
+
+.export-dialog {
+    margin-top: 32vh !important;
+    border-radius: 12px;
+    width: 30%;
+    min-width: 300px;
+    backdrop-filter: blur(10px);
+  }
+  
+  .export-dialog .el-dialog__header {
+    padding: 0 0;
+  }
+  
+  .export-dialog .el-dialog__body {
+    padding: 0 0;backdrop-filter: blur(10px);
+  }
+  
+  .export-content>.header {
+    width: 100%;
+    padding: 17px 24px;
+    box-sizing: border-box;
+    font-size: 16px;
+    font-family: PingFangSC-Medium, PingFang SC;
+    font-weight: 500;
+    border-bottom: 1px solid #D1D3D5;
+    ;
+  }
+  
+  .export-content>.footer {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 20px;
+    box-sizing: border-box;
+    border-top: 1px solid #D1D3D5;
+    ;
+  }
+  
+  .export-content>.center {
+    padding: 24px 50px;
+    box-sizing: border-box;
+  }
+  
+  .export-content>.center>.date-sele,
+  .export-content>.center>.radio-sele {
+    font-size: 14px;
+    font-family: PingFangSC-Regular, PingFang SC;
+  }
+  
+  .export-content>.center>.date-sele>label,
+  .export-content>.center>.radio-sele>label {
+    margin-right: 8px;
+  }
+  
+  .export-content>.center>.radio-sele {
+    margin-top: 24px;
+  }
+
+.console-box /deep/ .el-overlay{
+    background-color: rgba(0,0,0,.5);
+    backdrop-filter: blur(10px);
+}

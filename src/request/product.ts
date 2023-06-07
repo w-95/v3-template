@@ -12,9 +12,17 @@ export const getProductTypeList = () => {
 
 // console page 获取图表数据
 export const getProductChartData = (params: chartParamT) => {
-    console.log(params)
     return axios({
         url: "/product/getProductDataStatisticsByInternalDate",
+        method: "post",
+        data: params
+    })
+};
+
+// console page 切换图表数据 7year 7week 7day
+export const getOrderChartData = (params: { type: number }) => {
+    return axios({
+        url: "/product/getOrderDataStatisticsByInternalDate",
         method: "post",
         data: params
     })
