@@ -5,7 +5,7 @@ import { ECharts } from "echarts";
 
 import { consoleHeaderCard, deliveryReportTime } from "@/data";
 
-import { ConsoleChartT, ConsoleWeekChartT } from "@/interface/chart.ts";
+import { ConsoleWeekChartT } from "@/interface/chart.ts";
 import { chartIdName } from '@/interface/enum';
 
 import { getProductChartData, getOrderChartData } from "@/request/product.ts";
@@ -21,8 +21,8 @@ export const useChartData = ({ memberId, disinfectId, deliveryId }: paramT) => {
 
     const cards = reactive(consoleHeaderCard);
     const exportDateRange = ref([
-        new Date(new Date().setDate(new Date().getDate() - 6)).Format("yyyy-MM-dd"),
-        new Date().Format("yyyy-MM-dd")
+        new Date(new Date().setDate(new Date().getDate() - 6)),
+        new Date()
     ]);
     const showTool = ref(false);
 
@@ -30,8 +30,8 @@ export const useChartData = ({ memberId, disinfectId, deliveryId }: paramT) => {
         // chart data
         const { status: chartStatus, data: chartData } = await getProductChartData(
             {
-                startTime: exportDateRange.value[0],
-                endTime: exportDateRange.value[1],
+                startTime: exportDateRange.value[0].Format("yyyy-MM-dd"),
+                endTime: exportDateRange.value[1].Format("yyyy-MM-dd"),
                 memberId: memberId
             }
         );
@@ -112,11 +112,11 @@ export const useChartData = ({ memberId, disinfectId, deliveryId }: paramT) => {
      */
     const seleChange = async ( seleValue: number) => 
     {
-        const checkDay = deliveryReportTime.filter((item, index) => item.value === seleValue)[0].day;
+        const checkDay = deliveryReportTime.filter((item) => item.value === seleValue)[0].day;
 
         exportDateRange.value = [
-            new Date(new Date().setDate(new Date().getDate() - (checkDay -1))).Format("yyyy-MM-dd"), 
-            new Date().Format("yyyy-MM-dd")
+            new Date(new Date().setDate(new Date().getDate() - (checkDay -1))), 
+            new Date()
         ];
 
         const { status, data } = await getOrderChartData({ type: seleValue });

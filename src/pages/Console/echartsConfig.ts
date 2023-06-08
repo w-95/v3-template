@@ -16,7 +16,7 @@ export const getDisinfect_echarts = function ({ timersX, totalCounts, successs, 
             },
             formatter: (params: any[]) => {
                 let str = "";
-                params.forEach((item, index) => {
+                params.forEach((item) => {
                     let color = item.seriesName === "消毒任务量/次" ? '#CDCDCD' : item.seriesName === "成功任务量/次" ? "#289EED" : "#FFB84E"
                     let markerSpan = `<span style=display:inline-block;margin-right:10px;border-radius:10px;width:20px;height:8px;background-color:${color}></span>`
                     let markerSpan_1 = `<span style=display:inline-block;margin-right:10px;width:20px;height:8px;>
@@ -188,7 +188,7 @@ export const getDelivery_echarts = function ({ timersX, totalCounts, successs, p
             },
             formatter: (params: any[]) => {
                 let str = "";
-                params.forEach((item, index) => {
+                params.forEach((item) => {
                     let color = item.seriesName === "配送任务量/次" ? '#CDCDCD' : item.seriesName === "成功任务量/次" ? "#6160F4" : "#FFB84E"
                     let markerSpan = `<span style=display:inline-block;margin-right:10px;border-radius:10px;width:20px;height:8px;background-color:${color}></span>`
                     let markerSpan_1 = `<span style=display:inline-block;margin-right:10px;width:20px;height:8px;>

@@ -21,12 +21,11 @@
         <div :id="chartIdName.deliveryCharId"></div>
 
         <div class="toolbox" v-if="showTool">
-          <el-select size="mini" v-model="deliveryPickerSele" placeholder="请选择" class="select-tool" @change="seleChange">
+          <el-select size="small" v-model="deliveryPickerSele" placeholder="请选择" class="select-tool" @change="seleChange">
             <el-option v-for="(item) in deliveryReportTime" :key="item.label" :label="item.label"
               :value="item.value"></el-option>
           </el-select>
-
-          <el-button size="mini" type="primary" @click="setShowDialog">导出报表{{  showDialog }}</el-button>
+          <el-button size="small" type="primary" @click="setShowDialog">导出报表</el-button>
         </div>
       </el-card>
     </div>
@@ -85,7 +84,7 @@ export default {
     // 当前选择的7day\year
     const deliveryPickerSele = ref(1);
     // 是否显示dialog
-    const showDialog = ref(true);
+    const showDialog = ref(false);
     // 日历显示规则
     const pickerOptions = {
       disabledDate: (time: Date) => {
@@ -109,7 +108,7 @@ export default {
     const hideDialog = () => 
     {
       showDialog.value = false;
-      exportDateRange.value = [new Date(new Date().setDate(new Date().getDate() - 6)).Format("yyyy-MM-dd"), new Date().Format("yyyy-MM-dd")];
+      exportDateRange.value = [new Date(new Date().setDate(new Date().getDate() - 6)), new Date()];
       exportRadio.value = 1;
     };
 
