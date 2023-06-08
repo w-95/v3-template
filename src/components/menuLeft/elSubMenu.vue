@@ -8,7 +8,7 @@
         </template>
 
         <el-menu-item-group v-for="(sub, idx) in subMenuChild" :key="sub.name" :class="[`bottom-ment-item-${index}-sub`]">
-            <el-menu-item :index="index + '-' + (idx + 1)">
+            <el-menu-item :index="index + '-' + (idx + 1)" @click="gotoPage(sub)">
                 <span>{{ $t(`menuLeft.${lang}.child.${sub.lang}`) }}</span>
             </el-menu-item>
         </el-menu-item-group>
@@ -16,7 +16,7 @@
 </template>
 
 <script lang="ts" setup>
-import { PropType } from 'vue';
+import { PropType, defineEmits } from 'vue';
 import { MenuT } from '@/interface/menu';
 
 import icon from "./icon.vue";
@@ -41,6 +41,12 @@ const props = defineProps({
 });
 
 const { index, title, subMenuChild } = props;
+
+const emits = defineEmits(['menuChange'])
+
+const gotoPage = ( menu: MenuT) => {
+    emits('menuChange', menu);
+}
 
 </script>
 

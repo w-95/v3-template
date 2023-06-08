@@ -39,8 +39,7 @@
           <div class="date-sele">
             <label>选择日期范围:</label>
             <el-date-picker class="timer-tool" v-model="exportDateRange" type="daterange" align="right" unlink-panels
-              range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" :picker-options="pickerOptions"
-              value-format="yyyy-MM-dd">
+              range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" :picker-options="pickerOptions">
             </el-date-picker>
           </div>
           <div class="radio-sele">
@@ -81,9 +80,9 @@ export default {
   setup() {
     const globalStore = useGlobalStore();
 
-    // 当前选择的7day\year
+    // 当前选择的7天、7周...
     const deliveryPickerSele = ref(1);
-    // 是否显示dialog
+    // 是否显示导出的dialog
     const showDialog = ref(false);
     // 日历显示规则
     const pickerOptions = {
@@ -95,16 +94,21 @@ export default {
         return (time.getTime() < new Date(Y - 1, M, D).getTime() || time.getTime() > new Date(Y, M, D).getTime())
       }
     };
-    // 导出报表类型
-    const exportRadio = ref(0);
+    // 导出报表的类型
+    const exportRadio = ref(1);
     const charHookInfo = useChartData({
       memberId: globalStore.userInfo?.id || 0,
       disinfectId: chartIdName.disinfectChartId,
       deliveryId: chartIdName.deliveryCharId
     });
 
+    // 如果loading没打开就打开loading
+    if(!globalStore.globalLoading) globalStore.setGlobalLoading(true);
+
+    // echarts图表相关
     const { exportDateRange } = charHookInfo;
 
+    // 关闭导出的dialog - 还原事件选择的区间(7day) - 还原导出报表的默认类型
     const hideDialog = () => 
     {
       showDialog.value = false;

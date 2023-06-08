@@ -1,5 +1,5 @@
 <template>
-    <el-menu-item :index="index" :class="[`bottom-ment-item-${index}`]">
+    <el-menu-item :index="index" :class="[`bottom-ment-item-${index}`]" @click="gotoChange">
         <el-icon v-if="isShowIcon">
             <Icon :path-name="iconName" />
         </el-icon>
@@ -8,6 +8,7 @@
 </template>
 
 <script lang="ts" setup>
+import { defineEmits } from "vue";
 import { useI18n } from 'vue-i18n';
 
 import Icon from "./icon.vue";
@@ -34,6 +35,10 @@ const props = defineProps({
 const { tm } = useI18n();
 
 const { index, title } = props;
+
+const emits = defineEmits(['menuChange']);
+
+const gotoChange = () => emits('menuChange', { name: '' });
 
 const getTitle = ( lTitle: string ) => {
     const obj: any = tm('menuLeft');

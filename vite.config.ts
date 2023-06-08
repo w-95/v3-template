@@ -1,14 +1,15 @@
 import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
-import vueI18n from "@intlify/vite-plugin-vue-i18n";
+import vueI18n from '@intlify/vite-plugin-vue-i18n';
 import path from 'path';
 
 import viteCompression from 'vite-plugin-compression';
-import vueJsx from "@vitejs/plugin-vue-jsx";
+import vueJsx from '@vitejs/plugin-vue-jsx';
 
 import PkgConfig from 'vite-plugin-package-config';
 import OptimizationPersist from 'vite-plugin-optimize-persist';
-console.log(process.env.NODE_ENV, '-----')
+
+console.log(process.env.NODE_ENV, '-----');
 // https://vitejs.dev/config/
 export default defineConfig({
   base: './',
@@ -25,8 +26,8 @@ export default defineConfig({
     }),
     vueJsx(),
     vueI18n({
-      include: path.resolve(__dirname, './locales/**')
-    })
+      include: path.resolve(__dirname, './locales/**'),
+    }),
   ],
   mode: process.env.NODE_ENV,
   // 否则拿不到process对象
@@ -85,7 +86,7 @@ export default defineConfig({
         secure: false,
         rewrite: (path) => path.replace(/^\/web_fe_api/, ''),
         ws: true,
-      }
+      },
     },
   },
 

@@ -23,12 +23,25 @@ const routes: RouteRecordRaw[] = [
         path: '',
         name: 'Console',
         meta: { 
+          title: "控制台",
           transition: "animate__animated animate__fadeIn animate-custom-duration",
           transitionOut: "animate__animated animate__fadeOut animate-custom-duration",
           requireAuth: true, 
           mode: "out-in" 
         },
         component: Console,
+      },
+      {
+        path: '/product/list',
+        name: 'ProdList',
+        meta: { 
+          title: "产品列表",
+          transition: "animate__animated animate__fadeIn animate-custom-duration",
+          transitionOut: "animate__animated animate__fadeOut animate-custom-duration",
+          requireAuth: true, 
+          mode: "out-in" 
+        },
+        component: () => import('@/pages/product/list.vue'),
       }
     ]
   },

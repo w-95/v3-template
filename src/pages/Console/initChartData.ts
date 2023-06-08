@@ -13,12 +13,14 @@ import { getProductChartData, getOrderChartData } from "@/request/product.ts";
 import { getDelivery_echarts, getDisinfect_echarts } from './echartsConfig.ts';
 
 import { useResizeObserver } from '@vueuse/core';
+import { useGlobalStore } from '@/store/global';
 
 type paramT= { memberId: number, disinfectId: chartIdName, deliveryId: chartIdName };
 export type resetWeekT = { timersX: string[], totalCounts: number[], successs: number[], percentage: number[] };
 
 export const useChartData = ({ memberId, disinfectId, deliveryId }: paramT) => {
 
+    const globalStore = useGlobalStore();
     const cards = reactive(consoleHeaderCard);
     const exportDateRange = ref([
         new Date(new Date().setDate(new Date().getDate() - 6)),
@@ -78,7 +80,10 @@ export const useChartData = ({ memberId, disinfectId, deliveryId }: paramT) => {
     {
         const { El, CHART } = getEl_echarts(id);
 
-        if(id === chartIdName.deliveryCharId) CHART.on('rendered', () => (showTool.value = true));
+        if(id === chartIdName.deliveryCharId){ 
+            CHART.on('rendered', () => (showTool.value = true));
+            globalStore.setGlobalLoading(false);
+        };
 
         const {timersX, totalCounts, successs, percentage} = resetWeekInfo(deliveryOrderStatisticsByWeek);
 

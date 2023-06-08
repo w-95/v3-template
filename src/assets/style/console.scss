@@ -61,64 +61,64 @@
     }
 }
 
-.export-dialog {
-    margin-top: 32vh !important;
-    border-radius: 12px;
-    width: 30%;
-    min-width: 300px;
-    backdrop-filter: blur(10px);
-  }
+:deep(.export-dialog) {
+  margin-top: 32vh !important;
+  border-radius: 8px;
+  width: 500px !important;
+  backdrop-filter: blur(10px);
+}
   
-  .export-dialog .el-dialog__header {
-    padding: 0 0;
-  }
+:deep(.export-dialog .el-dialog__header) {
+  padding: 0 0;
+}
   
-  .export-dialog .el-dialog__body {
-    padding: 0 0;backdrop-filter: blur(10px);
-  }
+:deep(.export-dialog .el-dialog__body) {
+  padding: 0 0;backdrop-filter: blur(10px);
+  width: 500px;
+}
   
-  .export-content>.header {
-    width: 100%;
-    padding: 17px 24px;
-    box-sizing: border-box;
-    font-size: 16px;
-    font-family: PingFangSC-Medium, PingFang SC;
-    font-weight: 500;
-    border-bottom: 1px solid #D1D3D5;
-    ;
-  }
+:deep(.export-content>.header) {
+  width: 100%;
+  padding: 17px 24px;
+  box-sizing: border-box;
+  font-size: 16px;
+  font-family: PingFangSC-Medium, PingFang SC;
+  font-weight: 500;
+  border-bottom: 1px solid #D1D3D5;
+}
   
-  .export-content>.footer {
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
-    padding: 12px 20px;
-    box-sizing: border-box;
-    border-top: 1px solid #D1D3D5;
-    ;
-  }
+:deep(.export-content>.footer) {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 20px;
+  box-sizing: border-box;
+  border-top: 1px solid #D1D3D5;
+}
   
-  .export-content>.center {
-    padding: 24px 50px;
-    box-sizing: border-box;
-  }
+:deep(.export-content>.center) {
+  padding: 24px 50px;
+  box-sizing: border-box;
+}
   
-  .export-content>.center>.date-sele,
-  .export-content>.center>.radio-sele {
-    font-size: 14px;
-    font-family: PingFangSC-Regular, PingFang SC;
-  }
+:deep(.export-content>.center>.date-sele),
+:deep(.export-content>.center>.radio-sele) {
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  font-family: PingFangSC-Regular, PingFang SC;
+}
   
-  .export-content>.center>.date-sele>label,
-  .export-content>.center>.radio-sele>label {
+:deep(.export-content>.center>.date-sele>label),
+:deep(.export-content>.center>.radio-sele>label) {
     margin-right: 8px;
-  }
+}
   
-  .export-content>.center>.radio-sele {
-    margin-top: 24px;
-  }
+:deep(.export-content>.center>.radio-sele) {
+  margin-top: 24px;
+}
 
 .console-box :deep(.el-overlay){
-    background-color: rgba(0,0,0,.5);
-    backdrop-filter: blur(10px);
+  background-color: rgba(0,0,0,.5);
+  backdrop-filter: blur(10px);
 }
