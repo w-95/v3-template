@@ -1,3 +1,4 @@
+import { roleCodeT } from './enum';
 export interface UserInfoT {
     applicationId: number,
     createBy: number,
@@ -9,7 +10,7 @@ export interface UserInfoT {
     nickName: string,
     realName: string,
     registerTime: string,
-    roleCode: string,
+    roleCode: keyof typeof roleCodeT,
     sceneFlag: boolean,
     updateBy: number,
     updateTime: string,

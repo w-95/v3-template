@@ -24,6 +24,7 @@ const routes: RouteRecordRaw[] = [
         name: 'Console',
         meta: { 
           title: "控制台",
+          keepAlive: true,
           transition: "animate__animated animate__fadeIn animate-custom-duration",
           transitionOut: "animate__animated animate__fadeOut animate-custom-duration",
           requireAuth: true, 
@@ -36,8 +37,8 @@ const routes: RouteRecordRaw[] = [
         name: 'ProdList',
         meta: { 
           title: "产品列表",
-          transition: "animate__animated animate__fadeIn animate-custom-duration",
-          transitionOut: "animate__animated animate__fadeOut animate-custom-duration",
+          transition: "animate__animated animate__fadeInLeft animate-custom-duration",
+          transitionOut: "animate__animated animate__fadeOutRight animate-custom-duration",
           requireAuth: true, 
           mode: "out-in" 
         },

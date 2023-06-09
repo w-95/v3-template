@@ -10,6 +10,7 @@ import { singin, getUserInfo, getMenuRoute } from "@/request/user.ts";
 import { loginParamT } from "@/interface/apiParams.ts";
 import { UserInfoT } from "@/interface/user.ts";
 import { MenuListT } from "@/interface/menu";
+import { roleCodeT } from "@/interface/enum";
 import { leftMenuRoutersVar, userInfoVar, loginTokenVar } from '@/data';
 import { resetRouterLeft } from "@/utils/index";
 
@@ -128,5 +129,23 @@ export const useGlobalStore = defineStore({
 
       this.globalLoading = checkLoading;
     },
+
+    checkRoleCode( roleCode: roleCodeT) {
+      if(!this.userInfo) return false;
+
+      return this.userInfo.roleCode === roleCode;
+    },
+
+    checkRole_USER() {
+      if(!this.userInfo) return false;
+
+      return this.userInfo.roleCode === roleCodeT.USER;
+    },
+
+    checkRole_ADMIN() {
+      if(!this.userInfo) return false;
+
+      return this.userInfo.roleCode === roleCodeT.ADMIN;
+    }
   },
 });

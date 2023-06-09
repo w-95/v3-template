@@ -1,6 +1,6 @@
 import axios from "./axios";
 
-import { chartParamT } from "@/interface/apiParams";
+import { chartParamT, PordtListPT } from "@/interface/apiParams";
 
 // console page 获取产品类型列表
 export const getProductTypeList = () => {
@@ -25,5 +25,22 @@ export const getOrderChartData = (params: { type: number }) => {
         url: "/product/getOrderDataStatisticsByInternalDate",
         method: "post",
         data: params
+    })
+};
+
+// product List 获取产品的类型
+export const getProductTypes = () => {
+    return axios({
+        url: "/product/type/list",
+        method: "get"
+    })
+};
+
+// product table 获取产品的机器人
+export const getPordtList = ( params: PordtListPT) => {
+    return axios({
+        url: '/product/list2',
+        method: "get",
+        params
     })
 }

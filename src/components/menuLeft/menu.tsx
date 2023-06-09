@@ -25,9 +25,7 @@ export default defineComponent({
     
     const handleClose = () => {};
     
-    const setIsCollapse = () => {
-      isCollapse.value = !isCollapse.value;
-    };
+    const setIsCollapse = () => isCollapse.value = !isCollapse.value;
 
     const style = computed(() => {
       return {'width': isCollapse.value ? 'auto' : '280px'}
@@ -44,6 +42,8 @@ export default defineComponent({
           break;
       }
     };
+
+    const menuLeng = globalStore.menuRoutes.length;
 
     return () => (
         <ElMenu default-active="2" class="el-menu-vertical-demo" style={style.value}
@@ -65,11 +65,11 @@ export default defineComponent({
 
             <ElMenuItem index='100' title='SETTINGS' isShowIcon={false}></ElMenuItem>
 
-            <ElMenuItem index={globalStore.menuRoutes.length + 4 + ''} title='setting' iconName="setting"></ElMenuItem>
+            <ElMenuItem index={menuLeng + 4 + ''} title='setting' iconName="setting"></ElMenuItem>
 
-            <SettingSubMenu index={globalStore.menuRoutes.length + 5 + ''} title='themes'></SettingSubMenu>
+            <SettingSubMenu index={menuLeng + 5 + ''} title='themes'></SettingSubMenu>
 
-            <ElMenuItem index={globalStore.menuRoutes.length + 98 + ''} title='' iconName=""></ElMenuItem>
+            <ElMenuItem index={menuLeng + 98 + ''} title='' iconName=""></ElMenuItem>
 
             <el-menu-item index='99' class={ !isCollapse.value ? 'bottom-menu-item-last': 'bottom-menu-item-last-shou'} onClick={setIsCollapse}>
               <el-icon>
