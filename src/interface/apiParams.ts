@@ -16,3 +16,9 @@ export interface PordtListPT {
     pageNum: number,
     pageSize: number
 }
+
+export interface prodtInfoPT {
+    productId: string,
+    memberId: number,
+    id: string
+}

@@ -43,6 +43,18 @@ const routes: RouteRecordRaw[] = [
           mode: "out-in" 
         },
         component: () => import('@/pages/product/list.vue'),
+      },
+      {
+        path: '/product/edit',
+        name: 'ProdEdit',
+        meta: { 
+          title: "产品编辑",
+          transition: "animate__animated animate__fadeInLeft animate-custom-duration",
+          transitionOut: "animate__animated animate__fadeOutRight animate-custom-duration",
+          requireAuth: true, 
+          mode: "out-in" 
+        },
+        component: () => import('@/pages/productEdit/index.vue'),
       }
     ]
   },

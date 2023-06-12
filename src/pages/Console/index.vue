@@ -2,7 +2,7 @@
   <div class="console-box">
     <!-- 头部card 4 -->
     <div class="header-card-box">
-      <el-card class="item-card" v-for="(card, index) in cards" :key="index">
+      <el-card class="item-card" v-for="(card, index) in cards" :key="index" @click="">
         <HeaderCard v-bind="{ ...card }"></HeaderCard>
       </el-card>
     </div>
@@ -11,9 +11,9 @@
     <div class="footer-card-box">
 
       <!-- 左侧图表 -->
-      <el-card class="chart-card">
+      <!-- <el-card class="chart-card">
         <div :id="chartIdName.disinfectChartId"></div>
-      </el-card>
+      </el-card> -->
 
       <!-- 右侧图表 -->
       <el-card class="chart-card">

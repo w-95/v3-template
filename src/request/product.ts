@@ -1,6 +1,6 @@
 import axios from "./axios";
 
-import { chartParamT, PordtListPT } from "@/interface/apiParams";
+import { chartParamT, PordtListPT, prodtInfoPT } from "@/interface/apiParams";
 
 // console page 获取产品类型列表
 export const getProductTypeList = () => {
@@ -41,6 +41,15 @@ export const getPordtList = ( params: PordtListPT) => {
     return axios({
         url: '/product/list2',
         method: "get",
+        params
+    })
+};
+
+// 获取产品信息
+export const getProductInfo = ( params: prodtInfoPT) => {
+    return axios({
+        url: '/product/detail/' + params.id,
+        method: 'get',
         params
     })
 }

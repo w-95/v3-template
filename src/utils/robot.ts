@@ -1,4 +1,9 @@
-import { robotParentStatus, robotSubStatus } from '@/interface/enum';
+import { robotParentStatus, robotSubStatus, robotCode } from '@/interface/enum';
+
+// 产品类型
+export const getPorductType = (type: robotCode) => {
+  // switch
+};
 
 // 机器人是否在线
 export const isOnline = (robotStatusId: number) => {

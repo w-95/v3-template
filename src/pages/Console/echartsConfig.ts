@@ -208,11 +208,14 @@ export const getDelivery_echarts = function ({ timersX, totalCounts, successs, p
             data: timersX,
             nameTextStyle: {
                 fontSize: 10,
-                color: 'red'
+                color: '#FFF'
             },
             axisLabel: {
                 interval: 0,
                 fontSize: set_xAxis(timersX.length),
+                textStyle: {
+                    color: '#5A687B'
+                }
             },
             axisTick: {
                 show: false
@@ -220,13 +223,16 @@ export const getDelivery_echarts = function ({ timersX, totalCounts, successs, p
         },
         yAxis: [{
             type: 'value',
-            name: '配送任务量',
+            name: '',
             min: 0,
             max: Math.max.apply(null,totalCounts),
             interval: Math.max.apply(null,totalCounts) / 5,
             axisLabel: {
                 show: true,
                 interval: 'auto',
+                textStyle: {
+                    color: '#5A687B'
+                },
                 formatter: (value: number) => {
                     return Math.round(value)
                 }
@@ -236,7 +242,7 @@ export const getDelivery_echarts = function ({ timersX, totalCounts, successs, p
             }
         }, {
             type: 'value',
-            name: '成功率',
+            name: '',
             positon: 'right',
             // 一般情况下百分比从0到100
             min: 0,
@@ -251,7 +257,7 @@ export const getDelivery_echarts = function ({ timersX, totalCounts, successs, p
             show: true
         }],
         legend: {
-            right: 0,
+            left: 200,
             top: 0,
             data: [{
                 name: '配送任务量/次',
@@ -271,7 +277,7 @@ export const getDelivery_echarts = function ({ timersX, totalCounts, successs, p
             }],
         },
         grid: {
-            top: '26%',
+            top: '20%',
             left: '3%',
             right: '4%',
             bottom: '0%',
@@ -365,6 +371,7 @@ const setBarWidth = ( length: number ) => {
 
 // 设置x轴的文字大小
 const set_xAxis = (length: number) => {
+    return 12
     if(length <= 10) {
         return 12
     }else if(length > 10 && length <= 17) {

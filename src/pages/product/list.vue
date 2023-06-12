@@ -20,7 +20,7 @@
         </el-form>
 
         <div class="pord-content">
-            <el-table :data="tableData" stripe class="table-box" height="100%" v-loading="loading" header-row-class-name="table-header-row-h" row-class-name="table-row-h">
+            <el-table :data="tableData" stripe class="table-box" v-loading="loading" header-row-class-name="table-header-row-h" row-class-name="table-row-h">
                 <el-table-column prop="productCode" label="机器人编号"></el-table-column>
                 <el-table-column prop="productName" label="机器人名称">
                     <template #default="scope">
@@ -45,28 +45,48 @@
                     </template>
                 </el-table-column>
                 <el-table-column label="管理员权限" align="center" v-if="!globalStore.checkRole_USER()">
-                    <template #default>
-                        <el-button style="color: #409eff" size="mini">编辑</el-button>
+                    <template #default="scope">
+                        <el-button style="color: #409eff" size="mini" @click="edit(scope.row)">编辑</el-button>
                     </template>
                 </el-table-column>
                 <template #empty v-if="!loading && !tableData.length">
                     <emptyComent></emptyComent>
                 </template>
             </el-table>
+
+            <div class="pagination-box">
+                <el-pagination
+                    background
+                    small
+                    hide-on-single-page
+                    v-model:current-page="pageInfo.pageNum"
+                    v-model:page-size="pageInfo.pageSize"
+                    layout="prev, pager, next, jumper"
+                    :total="pageInfo.total"
+                    @size-change="handleSizeChange"
+                    @current-change="handleCurrentChange"
+                />
+            </div>
         </div>
     </div>
 </template>
 
 <script lang="ts" setup>
 import { reactive, ref, Ref, onMounted } from 'vue';
+import { useRouter } from "vue-router";
 
 import { getProductTypes, getPordtList } from '@/request/product.ts';
 
 import { robotsTCodeT } from '@/interface/product.ts';
+
 import { useGlobalStore } from '@/store/global';
 import { isOffline } from "@/utils/robot.ts";
 
-import emptyComent from '@/components/tableemptyTips/index.vue';
+import emptyComent from '@/components/tableEmptyTips/index.vue';
+
+
+
+const router = useRouter();
 
 const search = reactive({
     productCode: '',
@@ -110,13 +130,31 @@ const robotDetail = (row: any) => {
 
 };
 
-const submitQuery = (row: any) => {
-
+const submitQuery = () => {
+    loading.value = true;
+    pageInfo.pageNum = 1;
+    onSubmit();
 };
 
 const callPage = (row: any) => {
 
 };
+
+const handleSizeChange = () => {
+
+};
+
+const handleCurrentChange = () => {
+
+};
+
+// 编辑
+const edit = (row: any) => 
+{
+    const { id, robotStatusId, productLocationId } = row;
+    const query = { productId: id, statusId: robotStatusId, locationId: productLocationId, defalutTab: 1 };
+    router.push({name: 'ProdEdit', query: query});
+}
 
 // 在线才能点击查看详情和呼叫
 const isDetail = isOffline;
@@ -137,61 +175,18 @@ const isDetail = isOffline;
         line-height: 60px;
     }
 
+    ::-webkit-scrollbar {
+            width: 0;
+            height: 10px;
+        }
+
     .pord-content{
         height: calc(100% - 60px);
         background-color: #FFF;
         border-radius: 16px;
         padding: 0 10px;
         box-sizing: border-box;
-        .table-box {
-            width: 100%;
-            padding-top: 20px;
-            // padding: 0 40px;
-            box-sizing: border-box;
-        }
+        overflow-y: scroll;
     }
 }
-
-:deep(.table-box .el-loading-spinner) {
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    margin: 3em;
-    display: inline-block;
-    position: relative;
-    vertical-align: middle;
-}
-:deep(.table-box .el-loading-spinner .circular){
-    display: none;
-}
-
-:deep(.table-box .el-loading-mask) {
-    display: flex;
-    justify-content: center
-}
-
-:deep(.table-box .el-loading-spinner),
-:deep(.table-box .el-loading-spinner::before),
-:deep(.table-box .el-loading-spinner::after) {
-    animation: 1s infinite ease-in-out;
-}
-
-:deep(.table-box .el-loading-spinner::before),
-:deep(.table-box .el-loading-spinner::after) {
-    width: 100%; 
-    height: 100%;
-    border-radius: 50%;
-    position: absolute;
-    top: 0;
-    left: 0;
-}
-:deep(.table-box .el-loading-spinner){
-    background-color: #0077FF;
-    animation-name: loader1;
-}
-@keyframes loader1 {
-    from { transform: scale(0); opacity: 1; }
-    to   { transform: scale(1); opacity: 0; }
-}
-
 </style>

@@ -18,6 +18,13 @@ export enum robotCode {
     '06'='标准底盘'
 }
 
+export enum productTypeIdT {
+    standardChassis=6,
+    deliveryRobot=5,
+    disinfectionRobot=4,
+    serviceRobot=3
+}
+
 // 用户的身份
 export enum roleCodeT {
     'USER'='USER',
@@ -47,3 +54,12 @@ export enum robotSubStatus {
     'lead'      = 9,    // 引领
     'explain'   = 10    // 讲解
 }
+
+// 产品编辑的tab
+export enum tabName {
+    attr='attr',
+    control='control',
+    propaganda='propaganda',
+    bootAnimation='bootAnimation',
+    propagandaVideo='propagandaVideo'
+} 

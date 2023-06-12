@@ -10,4 +10,13 @@ declare module 'vue-router' {
         title?: string,
         mode?: 'default' | 'out-in' | 'in-out'
     }
+
+    interface RouteLocationNormalizedLoaded {
+        query: {
+            productId?: string,
+            statusId?: number, 
+            locationId?: number, 
+            defalutTab?: 1 | 2 | 3 | 4
+        };
+      }
 }

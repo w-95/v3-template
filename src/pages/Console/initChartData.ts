@@ -64,7 +64,7 @@ export const useChartData = ({ memberId, disinfectId, deliveryId }: paramT) => {
             cards[3].topCount = appMemberCount;
 
             // 初始化消毒
-            initChartData(timerTaskStatisticsByWeek, disinfectId, getDisinfect_echarts);
+            // initChartData(timerTaskStatisticsByWeek, disinfectId, getDisinfect_echarts);
             // 初始化配送
             initChartData(deliveryOrderStatisticsByWeek, deliveryId, getDelivery_echarts);
         };
@@ -73,10 +73,10 @@ export const useChartData = ({ memberId, disinfectId, deliveryId }: paramT) => {
 
     /**
      * 初始化图表
-     * @param deliveryOrderStatisticsByWeek weekData
+     * @param byWeek weekData
      * @param id idname
      */
-    const initChartData = (deliveryOrderStatisticsByWeek: ConsoleWeekChartT[], id: string, config: Function) => 
+    const initChartData = (byWeek: ConsoleWeekChartT[], id: string, config: Function) => 
     {
         const { El, CHART } = getEl_echarts(id);
 
@@ -85,7 +85,7 @@ export const useChartData = ({ memberId, disinfectId, deliveryId }: paramT) => {
             globalStore.setGlobalLoading(false);
         };
 
-        const {timersX, totalCounts, successs, percentage} = resetWeekInfo(deliveryOrderStatisticsByWeek);
+        const {timersX, totalCounts, successs, percentage} = resetWeekInfo(byWeek);
 
         const options = config({ timersX, totalCounts, successs, percentage});
         CHART.setOption(options);

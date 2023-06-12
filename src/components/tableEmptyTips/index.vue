@@ -75,8 +75,6 @@
 <style lang="scss" scoped>
 .preloader {
     position: absolute;
-    margin-left: -55px;
-    margin-top: -100px;
     height: 110px;
     width: 110px;
     left: 50%;

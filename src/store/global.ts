@@ -130,18 +130,21 @@ export const useGlobalStore = defineStore({
       this.globalLoading = checkLoading;
     },
 
+    // 当前用户是否是传入的身份
     checkRoleCode( roleCode: roleCodeT) {
       if(!this.userInfo) return false;
 
       return this.userInfo.roleCode === roleCode;
     },
 
+    // 身份是否是user
     checkRole_USER() {
       if(!this.userInfo) return false;
 
       return this.userInfo.roleCode === roleCodeT.USER;
     },
 
+    // 身份是否是admin
     checkRole_ADMIN() {
       if(!this.userInfo) return false;
 
