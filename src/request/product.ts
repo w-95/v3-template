@@ -1,6 +1,6 @@
 import axios from "./axios";
 
-import { chartParamT, PordtListPT, prodtInfoPT } from "@/interface/apiParams";
+import { chartParamT, PordtListPT, prodtInfoPT, editProductT } from "@/interface/apiParams";
 
 // console page 获取产品类型列表
 export const getProductTypeList = () => {
@@ -51,5 +51,32 @@ export const getProductInfo = ( params: prodtInfoPT) => {
         url: '/product/detail/' + params.id,
         method: 'get',
         params
+    })
+};
+
+// 编辑产品信息
+export const editProduct = ( { id, ...params}: editProductT ) => {
+    return axios({
+        url: 'product/edit/' + id,
+        method: "post",
+        data: params
+    })
+};
+
+// 产品恢复出厂设置
+export const factoryReset = ( params: { productId: string } ) => {
+    return axios({
+        url: 'member/delAllDataByProduct',
+        method: 'post',
+        data: params
+    })
+};
+
+// 删除产品
+export const removeProduct = ( params: { productId: string } ) => {
+    return axios({
+        url: '/member/deleteProduct',
+        method: 'post',
+        data: params
     })
 }

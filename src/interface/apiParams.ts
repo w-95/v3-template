@@ -22,3 +22,14 @@ export interface prodtInfoPT {
     memberId: number,
     id: string
 }
+
+export interface editProductT {
+    id: string | number,
+    productName: string,
+    remindChargeValue: number,
+    chargeValue: number,
+    state: number,
+    businessId: number,
+    enabledState: number,
+    elevatorIds: string
+}

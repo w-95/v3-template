@@ -1,11 +1,11 @@
 <template>
-  <el-form ref="ruleFormRef" :model="ruleForm" :rules="rules" label-width="120px" class="demo-ruleForm table-box"
+  <el-form ref="formRef" :model="ruleForm" :rules="rules" label-width="120px" class="demo-ruleForm table-box"
     label-suffix="：" inline-message v-loading="loading">
-    <el-form-item label="产品名称" prop="productName">
+    <el-form-item label="产品名称" prop="productName" class="poredit-form-item">
       <el-input v-model="ruleForm.productName" placeholder="请输入产品名称" size="large" />
     </el-form-item>
 
-    <el-form-item label="提醒电量值" prop="remindChargeValue">
+    <el-form-item label="提醒电量值" prop="remindChargeValue" class="poredit-form-item">
       <el-radio-group v-model="ruleForm.remindChargeValue">
         <el-radio v-for="(radio, index) in remindRadios" :key="index" :label="radio.label" :value="radio.value"
           size="large">{{
@@ -13,198 +13,160 @@
       </el-radio-group>
     </el-form-item>
 
-    <el-form-item label="回充电量值" prop="chargeValue">
+    <el-form-item label="回充电量值" prop="chargeValue" class="poredit-form-item">
       <el-radio-group v-model="ruleForm.chargeValue">
         <el-radio v-for="(radio, index) in chargeRadios" :key="index" :label="radio.label" :value="radio.value">{{
           radio.name }}</el-radio>
       </el-radio-group>
     </el-form-item>
 
-    <el-form-item label="产品编号" prop="productCode">
+    <el-form-item label="产品编号" prop="productCode" class="poredit-form-item">
       <el-input v-model="ruleForm.productCode" disabled placeholder="请输入产品名称" size="large" />
     </el-form-item>
 
-    <el-form-item label="出库" prop="businessName">
+    <el-form-item label="出库" prop="businessName" class="poredit-form-item">
       <el-checkbox label="已交付客户" name="type" size="large" class="ck-checkbox" v-model="isShowBusinessIpt" />
-      <el-select v-model="ruleForm.businessName" v-show="isShowBusinessIpt" filterable placeholder="Select">
-        <el-option v-for="item in clientNames" :key="item.id" :label="item.businessName" value-key="businessName" :value="item"></el-option>
+      <el-select v-model="ruleForm.businessName" v-show="isShowBusinessIpt" filterable placeholder="Select" size="large">
+        <el-option v-for="item in clientNames" :key="item.id" :label="item.businessName" value-key="businessName"
+          :value="item"></el-option>
       </el-select>
     </el-form-item>
 
-    <el-form-item label="选择梯控" prop="businessName">
-      <el-select v-model="ruleForm.businessName" multiple filterable allow-create default-first-option
-        :reserve-keyword="false" placeholder="请选择">
-        <el-option v-for="(deviceData) in deviceList" :key="deviceData.id" :value="deviceData.id" :label="deviceData.deviceName" ></el-option>
+    <el-form-item label="选择梯控" prop="businessName" class="poredit-form-item">
+      <el-select v-model="ruleForm.elevatorIds" multiple filterable allow-create default-first-option
+        :reserve-keyword="false" placeholder="请选择" size="large">
+        <el-option v-for="(deviceData) in deviceList" :key="deviceData.id" :value="deviceData.id"
+          :label="deviceData.deviceName"></el-option>
       </el-select>
     </el-form-item>
 
-    <el-form-item label="停用机器人" prop="enabledState">
-      <el-checkbox-group v-model="ruleForm.enabledState">
-        <el-checkbox label="停用机器人" name="type" size="large" />
-      </el-checkbox-group>
+    <el-form-item label="停用机器人" prop="enabledState" class="poredit-form-item">
+      <el-checkbox label="停用机器人" v-model="ruleForm.enabledState" size="large" />
+    </el-form-item>
+
+    <el-form-item label="" prop="" class="poredit-form-item">
+      <el-button type="primary" plain size="large" :style="style" @click="editSubmitProduct">保存</el-button>
+      <el-button type="primary" plain size="large" :style="style" @click="delAllDataToInit">恢复出厂设置</el-button>
+      <el-button type="primary" plain size="large" @click="delProduct">删除</el-button>
     </el-form-item>
 
   </el-form>
 </template>
 
 <script lang="ts">
-import { reactive, onMounted, ref, Ref, toRefs } from 'vue';
-import { useRoute } from "vue-router";
+import {ref} from 'vue';
+import { useRoute, useRouter } from "vue-router";
 
-import { ElMessage } from 'element-plus/lib/components/index.js';
+import { ElMessage, ElMessageBox } from 'element-plus/lib/components/index.js';
 
-import { batteryTips, batteryTipsT_5, rechargeValue, rechargeValueT_5 } from "@/data";
+import { editProduct, factoryReset, removeProduct } from "@/request/product";
 
-import { getProductInfo } from "@/request/product";
-import { getBusinessAll } from "@/request/client.ts";
-import { getDeviceList } from '@/request/device.ts';
-
-import { useGlobalStore } from '@/store/global';
-
-import { productTypeIdT } from "@/interface/enum";
+import { px2vw } from "@/utils/index";
+import { FormInstance } from 'element-plus/lib/components/form/index.js';
+import { useAttrForm } from "./useAttrTab";
 
 export default ({
   setup() {
-    const state = reactive({
-      ruleForm: {
-        productName: '',          // 产品名称
-        remindChargeValue: 10,    // 提醒电量值
-        chargeValue: 10,          // 回充电量值
-        productCode: '',          // 产品编号
-        businessName: '',         // 交付客户
-        elevatorIds: '',          // 选择梯控
-        enabledState: false       // 机器人停用
-      },
+    const formRef = ref(null);
 
-      rules: {
-        productName: [
-          { required: true, message: '请输入产品名称', trigger: 'blur' },
-          { min: 1, max: 12, message: '产品名称长度为3-12个字符', trigger: 'blur' },
-        ],
-        remindChargeValue: [
-          { required: true, message: '请至少选择一项', trigger: 'blur' },
-        ],
-        chargeValue: [
-          { required: true, message: '请至少选择一项', trigger: 'blur' },
-        ]
+    const style = `marginRight: ${px2vw(20)} `;
+
+    const [route, router] = [useRoute(), useRouter()];
+
+    const { productId } = route.query;
+
+    const attrFormState = useAttrForm(productId || '');
+
+    const { isShowBusinessIpt, ruleForm } = attrFormState;
+
+    // 提交表单
+    const editSubmitProduct = () => 
+    {
+      if (formRef.value) {
+        (formRef.value as FormInstance).validate(async (valid: boolean) => {
+          if (valid) {
+            const { elevatorIds, enabledState, productCode, ...formData } = ruleForm.value;
+
+            const params = {
+              id: productId || -1,
+              elevatorIds: JSON.stringify(elevatorIds),
+              enabledState: enabledState ? 0 : 1,
+              state: Number(isShowBusinessIpt.value),
+              ...formData
+            };
+
+            const { status, data } = await editProduct(params);
+
+            if (status === 0 && data) {
+              ElMessage.success("提交成功!")
+            }
+          }
+        })
       }
-    });
-
-    // 提醒电量数组
-    let remindRadios: Ref<typeof batteryTips> = ref([]);
-    // 回充电量数组
-    const chargeRadios: Ref<typeof rechargeValue> = ref([]);
-    // 客户名称列表
-    const clientNames: any = ref([]);
-    // 设备列表
-    const deviceList: any = ref([]);
-    // 是否可选择交付客户
-    const isShowBusinessIpt = ref(false);
-    // 是否显示loading
-    const loading = ref(true);
-
-    const route = useRoute();
-    const globalStore = useGlobalStore();
-
-    onMounted(async () => {
-      const { productId } = route.query;
-      const memberId = globalStore.userInfo?.id;
-
-      // 如果有产品id就获取该产品信息
-      if (productId && memberId!!) {
-        
-
-        const requests = [
-          await getProductInfo({ id: productId, productId, memberId }),
-          await getBusinessAll({ memberId }),
-          await getDeviceList()
-        ];
-
-        try {
-          const [
-            { status: productStatus, data: productData }, 
-            { status: clientStatus, data: clientData }, 
-            { status: deviceStatus, data: deviceData}
-          ] = await Promise.all(requests);
-          
-          // 初始化form默认值
-          if(productStatus === 0) {
-            const { productName, productCode, productType, productTypeId, remindChargeValue } = productData;
-            const { chargeValue, businessName, elevatorIds, enabledState, state: productState } = productData;
-
-            state.ruleForm.productName = productName;
-            state.ruleForm.productCode = productCode + '【类型：' + productType + '】';
-            state.ruleForm.remindChargeValue = getRemindChargeValue(productTypeId, remindChargeValue);
-            state.ruleForm.chargeValue = getChargeValue(productTypeId, chargeValue);
-            state.ruleForm.businessName = businessName;
-            state.ruleForm.elevatorIds = elevatorIds;
-            state.ruleForm.enabledState = enabledState === 0 ? true : false;
-
-            remindRadios.value = productType === productTypeIdT.deliveryRobot ? batteryTips : batteryTipsT_5;
-            chargeRadios.value = productType === productTypeIdT.deliveryRobot ? rechargeValue : rechargeValueT_5;
-            isShowBusinessIpt.value = productState === 1 ? true : false;
-          };
-
-          // 初始化客户名称列表
-          if( clientStatus === 0) {
-            clientNames.value = clientData;
-          };
-
-          // 初始化设备列表
-          if( deviceStatus === 0) {
-            deviceList.value = deviceData;
-          };
-
-          if(productStatus !== 0 || clientStatus !== 0 && deviceStatus !== 0) {
-            const msg = productStatus !== 0 ? '产品' : clientStatus !== 0 ? '客户': '设备';
-            ElMessage.error(`获取${msg}信息异常!`);
-          };
-          
-          loading.value = false;
-
-        } catch (error) {
-          ElMessage.error("获取信息异常!");
-          loading.value = false;
-        };
-      }
-    });
-
-    /**
-     * 获取提醒电量值
-     * @param productTypeId 产品的类型 底盘、配送、消毒、服务 productTypeIdT
-     * @param remindChargeValue 提醒电量的值
-     * @returns string 电量值
-     */
-    const getRemindChargeValue = (productTypeId: productTypeIdT, remindChargeValue: number | undefined): number => {
-      if (remindChargeValue) return remindChargeValue;
-      if (productTypeId === productTypeIdT.deliveryRobot) {
-        return 25
-      };
-      return 15;
     };
 
-    /**
-     * 获取回充电量值
-     * @param productTypeId 产品的类型 底盘、配送、消毒、服务 productTypeIdT
-     * @param chargeValue 回充电量的值
-     * @returns stirng 电量值
-     */
-    const getChargeValue = (productTypeId: productTypeIdT, chargeValue: number | undefined): number => {
-      if (chargeValue) return chargeValue;
-      if (productTypeId === productTypeIdT.deliveryRobot) {
-        return 20
-      };
-      return 10;
+    // 恢复出厂设置
+    const delAllDataToInit = () => 
+    {
+      ElMessageBox.confirm(
+        '【恢复出厂设置】将会清理所有数据，包括：机器人用户、地图、任务等。是否继续操作?',
+        '特别警告',
+        {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }
+      )
+        .then(async () => {
+          const { status } = await factoryReset({ productId: productId || '' });
+          if (status === 0) {
+            ElMessage.success("操作成功!")
+          }
+        })
+        .catch(() => {
+          ElMessage({
+            type: 'info',
+            message: '操作失败!',
+          })
+        })
+    };
+
+    const delProduct = () => 
+    {
+      ElMessageBox.confirm(
+        '【删除机器人后不可恢复】，请慎重操作。是否继续?',
+        '特别警告',
+        {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }
+      )
+        .then( async () => {
+          const { status } = await removeProduct({productId: productId || ''});
+          if( status === 0 ) {
+            ElMessage({
+              type: 'success',
+              message: '删除成功!',
+              onClose: () => router.push({ name: 'ProdList' })
+            })
+          }
+        })
+        .catch(() => {
+          ElMessage({
+            type: 'info',
+            message: '操作失败!',
+          })
+        })
     };
 
     return {
-      ...toRefs(state),
-      remindRadios,
-      chargeRadios,
-      isShowBusinessIpt,
-      loading,
-      clientNames,
-      deviceList
+      ...attrFormState,
+      style,
+      editSubmitProduct,
+      formRef,
+      delAllDataToInit,
+      delProduct
     }
   },
 })
@@ -217,4 +179,26 @@ export default ({
 
 .ck-checkbox {
   margin-right: 24px;
-}</style>
+}
+
+.poredit-form-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+:deep(.poredit-form-item .el-form-item__content) {
+  flex: 1;
+  display: flex;
+}
+
+:deep(.poredit-form-item .el-form-item__content .el-radio-group) {
+  width: 100%;
+  justify-content: space-between;
+}
+
+:deep(.poredit-form-item .el-form-item__content .el-select) {
+  flex: 1;
+  justify-content: space-around;
+}
+</style>

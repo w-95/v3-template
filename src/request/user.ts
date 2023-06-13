@@ -27,4 +27,4 @@ export const getMenuRoute = () => {
         method: "get",
         data: {}
     })
-}
+};
