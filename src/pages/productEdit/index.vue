@@ -3,7 +3,7 @@
         <el-tabs v-model="activeName" class="demo-tabs" @tab-click="handleClick">
             <el-tab-pane v-for="tab in productEditTabs" :key="tab.id" :label="tab.label" :name="tab.name">
                 
-                <attrTab v-if="activeName===tabName.attr"></attrTab>
+                <attrTab v-if="activeName===tab.name"></attrTab>
             </el-tab-pane>
         </el-tabs>
     </div>
@@ -16,8 +16,6 @@ import { useRoute } from 'vue-router';
 import attrTab from './attrTab.vue';
 
 import { productEditTabs } from '@/data';
-
-import { tabName } from "@/interface/enum";
 
 const route = useRoute();
 

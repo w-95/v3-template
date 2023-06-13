@@ -5,12 +5,17 @@
  */
 
 import axios, { AxiosRequestConfig, AxiosRequestHeaders } from 'axios';
-import router from '../router/router';
+import { useRouter } from 'vue-router';
+
+import { ElMessage } from 'element-plus/lib/components/index.js';
+
 import { parseQuery } from "@/utils/index";
 
 interface customOptionsConfig {
   repeat_request_cancel?: boolean;
 };
+
+const router = useRouter();
 
 // 存储正在padding中得请求
 const pendingMap = new Map();
@@ -35,6 +40,7 @@ const reAxios = (axiosConfig: AxiosRequestConfig, customOptions?: customOptionsC
       errorMessageShow: true, // 是否开启接口错误信息展示，默认为true
       codeMessageShow: true, // 是否开启code不为0时的信息提示, 默认为false
       reductDataFormat: true, // 是否开启简洁的数据结构响应, 默认为true
+      loadingStatus: false // loading是否未打开状态
     },
     customOptions
   );
@@ -78,7 +84,14 @@ const reAxios = (axiosConfig: AxiosRequestConfig, customOptions?: customOptionsC
       ) {
         if (response.data.status === 401) {
           router.push('/login');
-        }
+        };
+
+        if(response.data.status === 403 && !customOption.loadingStatus) {
+          ElMessage({
+            message: response.data.msg,
+            onClose: () => customOption.loadingStatus = false
+          })
+        };
         return response.data; // code不等于0, 页面具体逻辑就不执行了
       }
       return customOption.reductDataFormat ? response.data : response;
