@@ -8,11 +8,9 @@ import { getProductInfo } from '@/request/product';
 import { getBusinessAll } from '@/request/client.ts';
 import { getDeviceList } from '@/request/device.ts';
 
-import { useGlobalStore } from '@/store/global';
-
 import { productTypeIdT } from '@/interface/enum';
 
-export const useAttrForm = (productId: string) => {
+export const useAttrForm = (productId: string, memberId: number) => {
   const state = reactive({
     ruleForm: {
       productName: '', // 产品名称
@@ -46,22 +44,20 @@ export const useAttrForm = (productId: string) => {
   // 设备列表
   const deviceList: any = ref([]);
   // 是否显示loading
-  const loading = ref(true);
-
-  const globalStore = useGlobalStore();
+  const loading = ref(false);
 
   onMounted(async () => {
-    const memberId = globalStore.userInfo?.id;
-
     // 如果有产品id就获取该产品信息
     if (productId && memberId!!) {
-      const requests = [
-        await getProductInfo({ id: productId, productId, memberId }),
-        await getBusinessAll({ memberId }),
-        await getDeviceList(),
-      ];
 
+      loading.value = true;
       try {
+        const requests = [
+          await getProductInfo({ id: productId, productId, memberId }),
+          await getBusinessAll({ memberId }),
+          await getDeviceList(),
+        ];
+
         const [
           { status: productStatus, data: productData },
           { status: clientStatus, data: clientData },
@@ -88,25 +84,26 @@ export const useAttrForm = (productId: string) => {
           chargeRadios.value = productTypeId === productTypeIdT.deliveryRobot ? rechargeValue : rechargeValueT_5;
           //enabledState: 0标识停用，否则为启用状态
           isShowBusinessIpt.value = productState === 1 ? true : false;
-        }
+        };
 
         // 初始化客户名称列表
         if (clientStatus === 0) {
           clientNames.value = clientData;
-        }
+        };
 
         // 初始化设备列表
         if (deviceStatus === 0) {
           deviceList.value = deviceData;
-        }
+        };
 
         if (productStatus !== 0 || (clientStatus !== 0 && deviceStatus !== 0)) {
           const msg = productStatus !== 0 ? '产品' : clientStatus !== 0 ? '客户' : '设备';
           ElMessage.error(`获取${msg}信息异常!`);
-        }
+        };
 
         loading.value = false;
       } catch (error) {
+        console.log(error)
         ElMessage.error('获取信息异常!');
         loading.value = false;
       }

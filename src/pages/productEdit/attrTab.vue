@@ -63,10 +63,17 @@ import { editProduct, factoryReset, removeProduct } from "@/request/product";
 
 import { px2vw } from "@/utils/index";
 import { FormInstance } from 'element-plus/lib/components/form/index.js';
-import { useAttrForm } from "./useAttrTab";
+import { useAttrForm } from "./attrTabForm";
 
 export default ({
-  setup() {
+  props: {
+    memberId: {
+      type: Number,
+      default: -1
+    }
+  },
+
+  setup(props) {
     const formRef = ref(null);
 
     const style = `marginRight: ${px2vw(20)} `;
@@ -75,7 +82,7 @@ export default ({
 
     const { productId } = route.query;
 
-    const attrFormState = useAttrForm(productId || '');
+    const attrFormState = useAttrForm(productId || '', props.memberId);
 
     const { isShowBusinessIpt, ruleForm } = attrFormState;
 

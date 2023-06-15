@@ -37,7 +37,6 @@
 
 import Header from "@/components/header/index.vue";
 import LeftMenu from '@/components/menuLeft/index.vue';
-import { onMounted } from 'vue';
 
 </script>
 

@@ -127,7 +127,7 @@ const onSubmit = async () => {
 };
 
 const robotDetail = (row: any) => {
-
+    console.log(row)
 };
 
 const submitQuery = () => {
@@ -137,7 +137,7 @@ const submitQuery = () => {
 };
 
 const callPage = (row: any) => {
-
+    console.log(row)
 };
 
 const handleSizeChange = () => {

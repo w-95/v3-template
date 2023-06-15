@@ -222,7 +222,7 @@ export const getDateTime = (num: number, dateName: string, startTime?: string) =
  * 创建一个a标签 允许它下载
  * @param params
  */
-export const createAtag_Downlod = (downloadOrigin: string, params: parsedT):HTMLElement => {
+export const createAtag_Downlod = (downloadOrigin: string, params: parsedT, download:string=""):HTMLElement => {
   let a = document.createElement('a');
   let keys = Object.keys(params);
 
@@ -232,5 +232,17 @@ export const createAtag_Downlod = (downloadOrigin: string, params: parsedT):HTML
   };
   str = str.replace('&', '?');
   a.href = downloadOrigin + str;
+  a.download = download;
   return a;
 };
+
+export const getSocketOrg = () => {
+
+  // const org = import.meta.env.VITE_API_URL + import.meta.env.VITE_API_BASEURL;
+  const org = 'https://w.droid.ac.cn' + import.meta.env.VITE_API_BASEURL;
+  if(org.startsWith("http:")){
+    return org.replace("http:","ws:");
+  }else if(org.startsWith("https:")){
+    return org.replace("https:","wss:")
+  }
+}
