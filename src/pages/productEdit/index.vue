@@ -2,12 +2,17 @@
     <div class="prot-edit-box">
         <el-tabs v-model="activeName" class="demo-tabs" @tab-click="handleClick">
             <el-tab-pane v-for="tab in productEditTabs" :key="tab.id" :label="tab.label" :name="tab.name">
+                
                 <div v-if="activeName === tab.name && tab.name === tabName.attr">
                     <attrTab :memberId="memberId" ></attrTab>
                 </div>
 
                 <div v-if="activeName === tab.name && tab.name === tabName.control">
                     <controlTab :memberId="memberId" ></controlTab>
+                </div>
+
+                <div v-if="activeName === tab.name && tab.name === tabName.propaganda">
+                    <foxglove :memberId="memberId" ></foxglove>
                 </div>
             </el-tab-pane>
         </el-tabs>
@@ -26,6 +31,7 @@ import { productEditTabs } from '@/data';
 
 import attrTab from './attrTab.vue';
 import controlTab from './controlTab.vue';
+import foxglove from "@/components/foxglove/index.vue";
 import { TabsPaneContext } from "element-plus/lib/components/tabs/src/constants"
 
 const route = useRoute();

@@ -62,4 +62,13 @@ export enum tabName {
     propaganda='propaganda',
     bootAnimation='bootAnimation',
     propagandaVideo='propagandaVideo'
-} 
+}
+
+// foxglove publish 通道id
+export enum foxGloveClient {
+    '/map'='map',
+    '/move_base/GlobalPlanner/plan'='plan',
+    '/scan'='scan',
+    '/tf'='tf',
+    '/wayPoint'='wayPoint'
+}

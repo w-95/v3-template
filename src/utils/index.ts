@@ -79,7 +79,7 @@ export const resetRouterLeft = (routers: MenuListT) => {
   return (routers as Array<MenuListT[]>).map((item: any) => {
     if (item.child) {
       item.child = resetRouterLeft(item.child);
-    };
+    }
 
     switch (item.name) {
       case '产品管理':
@@ -222,14 +222,18 @@ export const getDateTime = (num: number, dateName: string, startTime?: string) =
  * 创建一个a标签 允许它下载
  * @param params
  */
-export const createAtag_Downlod = (downloadOrigin: string, params: parsedT, download:string=""):HTMLElement => {
+export const createAtag_Downlod = (
+  downloadOrigin: string,
+  params: parsedT,
+  download: string = ''
+): HTMLElement => {
   let a = document.createElement('a');
   let keys = Object.keys(params);
 
   let str = '';
   for (let i = 0; i < keys.length; i++) {
     str += '&' + keys[i] + '=' + params[keys[i]];
-  };
+  }
   str = str.replace('&', '?');
   a.href = downloadOrigin + str;
   a.download = download;
@@ -237,12 +241,131 @@ export const createAtag_Downlod = (downloadOrigin: string, params: parsedT, down
 };
 
 export const getSocketOrg = () => {
-
   // const org = import.meta.env.VITE_API_URL + import.meta.env.VITE_API_BASEURL;
   const org = 'https://w.droid.ac.cn' + import.meta.env.VITE_API_BASEURL;
-  if(org.startsWith("http:")){
-    return org.replace("http:","ws:");
-  }else if(org.startsWith("https:")){
-    return org.replace("https:","wss:")
+  if (org.startsWith('http:')) {
+    return org.replace('http:', 'ws:');
+  } else if (org.startsWith('https:')) {
+    return org.replace('https:', 'wss:');
   }
+};
+
+/**
+ * 地图染色后转成base64
+ * @param bytes 
+ * @returns 
+ */
+export const getMapBase64 = (bytes: Uint8Array) => {
+  let width = 0;
+  let height = 0;
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+
+  if (ctx) {
+    let readIndex = 0;
+    // if (bytes[readIndex++] != 80 || bytes[readIndex++] != 53) {
+    //   console.log('---非pgm--');
+    //   return;
+    // }
+    readIndex++;
+    var c = bytes[readIndex++];
+    if (c == 35) {
+      do {
+        c = bytes[readIndex++];
+      } while (c != 10 && c != 13);
+      c = bytes[readIndex++];
+    }
+
+    // if (c < 48 || c > 57) {
+    //   console.log('---读取宽错误--:' + c);
+    //   return;
+    // }
+    let k = 0;
+    do {
+      k = k * 10 + c - 48;
+      c = bytes[readIndex++];
+    } while (c >= 48 && c <= 57);
+
+    width = k;
+
+    c = bytes[readIndex++];
+    // if (c < 48 || c > 57) {
+    //   console.log('---读取高错误--:' + c);
+    //   return;
+    // }
+
+    k = 0;
+    do {
+      k = k * 10 + c - 48;
+      c = bytes[readIndex++];
+    } while (c >= 48 && c <= 57);
+    height = k;
+
+    c = bytes[readIndex++];
+    // if (c < 48 || c > 57) {
+    //   console.log('---读取灰度错误--:' + c);
+    //   return;
+    // }
+    k = 0;
+    do {
+      k = k * 10 + c - 48;
+      c = bytes[readIndex++];
+    } while (c >= 48 && c <= 57);
+    // that.maxValue = k;
+    canvas.width = width; //注意这里要打引号
+    canvas.height = height;
+
+    console.log('width :::', width, 'height:::', height);
+    let content = ctx.createImageData(width, height);
+    for (let m = 0; m < width * height; m++) {
+      c = bytes[readIndex++];
+
+      if (c <= 126) {
+        // 墙89
+        content.data[m * 4 + 0] = 114; // R value
+        content.data[m * 4 + 1] = 142; // G value
+        content.data[m * 4 + 2] = 189; // B value
+        content.data[m * 4 + 3] = 255; // A value
+      } else if (c >= 130 && c <= 255) {
+        // 位置区域255
+        content.data[m * 4 + 0] = 235; // R value
+        content.data[m * 4 + 1] = 244; // G value
+        content.data[m * 4 + 2] = 254; // B value
+        content.data[m * 4 + 3] = 255; // A value
+      } else {
+        // 可行区域
+        content.data[m * 4 + 0] = 255; // R value
+        content.data[m * 4 + 1] = 255; // G value
+        content.data[m * 4 + 2] = 255; // B value
+        content.data[m * 4 + 3] = 255; // A value
+      }
+    }
+
+    ctx.putImageData(content, 0, 0, 0, 0, width, height);
+    let base64Str = canvas.toDataURL('image/jpg');
+    return base64Str;
+  }
+};
+
+/**
+ * uint8array数组转为base64字符串
+ */
+export const uint8arrayToBase64 = function(u8Arr: Uint8Array) {
+  try{
+         let CHUNK_SIZE = 0x8000; //arbitrary number
+         let index = 0;
+         let length = u8Arr.length;
+         let result = '';
+         let slice: any;
+         while (index < length) {
+             slice = u8Arr.subarray(index, Math.min(index + CHUNK_SIZE, length));
+             result += String.fromCharCode.apply(null, slice);
+             index += CHUNK_SIZE;
+         }
+         // web image base64图片格式: "data:image/png;base64," + b64encoded;
+         return  "data:image/png;base64," + btoa(result);
+     }
+     catch(e) {
+         throw e;
+     }
 }
