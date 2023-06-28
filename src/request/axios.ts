@@ -15,7 +15,7 @@ interface customOptionsConfig {
   repeat_request_cancel?: boolean;
 };
 
-const router = useRouter();
+
 
 // 存储正在padding中得请求
 const pendingMap = new Map();
@@ -44,6 +44,8 @@ const reAxios = (axiosConfig: AxiosRequestConfig, customOptions?: customOptionsC
     },
     customOptions
   );
+
+  const router = useRouter();
 
   service.interceptors.request.use(
     (config) => {
@@ -83,7 +85,7 @@ const reAxios = (axiosConfig: AxiosRequestConfig, customOptions?: customOptionsC
         response.data.status !== 0
       ) {
         if (response.data.status === 401) {
-          router.push('/login');
+          router.push({ name: 'LoginForm'});
         };
 
         if(response.data.status === 403 && !customOption.loadingStatus) {

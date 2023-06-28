@@ -51,7 +51,7 @@ export default {
                 { required: true, message: t(`loginForm.pwdErrTips`), trigger: 'blur' }
             ]
         });
-
+        globalStore.setGlobalLoading(false);
         const submitForm = () => {
             if(subRefs.value) {
                 subRefs.value.validate( async (valid: Boolean) => {

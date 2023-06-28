@@ -73,7 +73,7 @@ const routes: RouteRecordRaw[] = [
     children: [
       {
         path: '',
-        name: 'LoginFirm',
+        name: 'LoginForm',
         meta: { 
           transition: "animate__animated animate__fadeIn animate-custom-duration-03",
           transitionOut: "animate__animated animate__fadeOut animate-custom-duration-0",

@@ -63,4 +63,28 @@ onMounted(() => {
     box-sizing: border-box;
     overflow-y: scroll;
 }
+
+.demo-tabs{
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    :deep(.el-tabs__content) {
+        border: 1px solid pink;
+        flex: 1;
+        overflow-y: scroll;
+    }
+
+    :deep(.el-tabs__content > div:nth-of-type(3)) {
+        height: 100%;
+    }
+
+    :deep(.el-tabs__content > div:nth-of-type(3) > div) {
+        height: 100%;
+    }
+
+    ::-webkit-scrollbar {
+        width: 0;
+        height: 10px;
+    }
+}
 </style>
