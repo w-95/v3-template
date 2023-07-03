@@ -255,20 +255,17 @@ export const getSocketOrg = () => {
  * @param bytes 
  * @returns 
  */
-export const getMapBase64 = (bytes: Uint8Array) => {
-  let width = 0;
-  let height = 0;
+export const getMapBase64 = (bytes: Uint8Array, width: number, height: number) => {
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d');
 
   if (ctx) {
     let readIndex = 0;
-    // if (bytes[readIndex++] != 80 || bytes[readIndex++] != 53) {
-    //   console.log('---非pgm--');
-    //   return;
-    // }
+
     readIndex++;
+
     var c = bytes[readIndex++];
+
     if (c == 35) {
       do {
         c = bytes[readIndex++];
@@ -276,37 +273,25 @@ export const getMapBase64 = (bytes: Uint8Array) => {
       c = bytes[readIndex++];
     }
 
-    // if (c < 48 || c > 57) {
-    //   console.log('---读取宽错误--:' + c);
-    //   return;
-    // }
     let k = 0;
     do {
       k = k * 10 + c - 48;
       c = bytes[readIndex++];
     } while (c >= 48 && c <= 57);
 
-    width = k;
 
     c = bytes[readIndex++];
-    // if (c < 48 || c > 57) {
-    //   console.log('---读取高错误--:' + c);
-    //   return;
-    // }
 
     k = 0;
     do {
       k = k * 10 + c - 48;
       c = bytes[readIndex++];
     } while (c >= 48 && c <= 57);
-    height = k;
 
     c = bytes[readIndex++];
-    // if (c < 48 || c > 57) {
-    //   console.log('---读取灰度错误--:' + c);
-    //   return;
-    // }
+
     k = 0;
+    
     do {
       k = k * 10 + c - 48;
       c = bytes[readIndex++];
@@ -319,7 +304,6 @@ export const getMapBase64 = (bytes: Uint8Array) => {
     let content = ctx.createImageData(width, height);
     for (let m = 0; m < width * height; m++) {
       c = bytes[readIndex++];
-
       if (c <= 126) {
         // 墙89
         content.data[m * 4 + 0] = 114; // R value
@@ -343,29 +327,6 @@ export const getMapBase64 = (bytes: Uint8Array) => {
 
     ctx.putImageData(content, 0, 0, 0, 0, width, height);
     let base64Str = canvas.toDataURL('image/jpg');
-    return base64Str;
+    return {base64Str, grayData: content.data};
   }
 };
-
-/**
- * uint8array数组转为base64字符串
- */
-export const uint8arrayToBase64 = function(u8Arr: Uint8Array) {
-  try{
-         let CHUNK_SIZE = 0x8000; //arbitrary number
-         let index = 0;
-         let length = u8Arr.length;
-         let result = '';
-         let slice: any;
-         while (index < length) {
-             slice = u8Arr.subarray(index, Math.min(index + CHUNK_SIZE, length));
-             result += String.fromCharCode.apply(null, slice);
-             index += CHUNK_SIZE;
-         }
-         // web image base64图片格式: "data:image/png;base64," + b64encoded;
-         return  "data:image/png;base64," + btoa(result);
-     }
-     catch(e) {
-         throw e;
-     }
-}

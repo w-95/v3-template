@@ -18,7 +18,6 @@ import { theme } from './interface/enum';
 import { themeVar, loginTokenVar, userInfoVar, leftMenuRoutersVar } from "@/data/index";
 
 const app = createApp(App);
-
 app.use(elementPlus);
 app.use(pinia);
 app.use(router);

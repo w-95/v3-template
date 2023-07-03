@@ -9,7 +9,8 @@ import { parseChannel } from '@/foxglove/parser';
 import * as base64 from '@protobufjs/base64';
 
 import protobufjs from 'protobufjs';
-import { uint8arrayToBase64 } from "@/utils/index";
+import { getMapBase64 } from "@/utils/index";
+import { TopicMapT, OffsetWHT } from "@/interface/foxgloveThree";
 
 import { MessageDefinitionField, MessageDefinition } from '@foxglove/message-definition';
 
@@ -30,7 +31,10 @@ type ResolvedChannel = {
   parsedChannel: ParsedChannel;
 };
 
-export const useFoxgloveSocket = (linkUrl: string, rosNumber: string) => {
+type OptionT = {
+  mapDataChange: (data: TopicMapT) => void
+}
+export const useFoxgloveSocket = (linkUrl: string, rosNumber: string, options: OptionT) => {
   const msgInstance: Ref<any> = ref(null);
   let client: Ref<any> = ref(null);
   const channelsByTopic: any = ref(new Map<string, ResolvedChannel>());
@@ -143,7 +147,6 @@ export const useFoxgloveSocket = (linkUrl: string, rosNumber: string) => {
 
       client.value.subscribe(channel.id);
     });
-
     console.log('this is a channelsByTopic.value =====', channelsByTopic.value);
   });
 
@@ -152,7 +155,7 @@ export const useFoxgloveSocket = (linkUrl: string, rosNumber: string) => {
   });
 
   client.value.on('message', ({ subscriptionId, data }: any) => {
-    console.log('client on :::message event', subscriptionId, data);
+    // console.log('client on :::message event', subscriptionId, data);
     // receivedBytes.value += data.byteLength;
 
     // /scan=1  /map=2  /move_base/GlobalPlanner/plan=3  /tf=4  /wayPoint=5
@@ -161,10 +164,18 @@ export const useFoxgloveSocket = (linkUrl: string, rosNumber: string) => {
     if (topicChanInfo) {
       const message = topicChanInfo.parsedChannel.deserialize(data);
       
+      // 地图数据
       if( subscriptionId === 1 && message) {
         const mapData = message.data;
-        const mapData64 = uint8arrayToBase64(mapData);
-        console.log('message::', message, mapData64)
+        const mapData64 = getMapBase64(mapData, message.info.width, message.info.height);
+        console.log('地图::', message, mapData64);
+        options.mapDataChange(message);
+        return;
+      };
+
+      // 激光雷达扫描数据
+      if( subscriptionId === 0 && message) {
+        console.log("激光雷达扫描::", message)
       }
     }
   });
@@ -197,4 +208,6 @@ export const useFoxgloveSocket = (linkUrl: string, rosNumber: string) => {
     messageEncoding: string;
     schema: { name: string; encoding: string; data: Uint8Array } | undefined;
   };
+
+  return { client };
 };

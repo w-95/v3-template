@@ -34,9 +34,13 @@
 </template>
 
 <script setup lang="ts">
-
+import { onMounted } from "vue";
 import Header from "@/components/header/index.vue";
 import LeftMenu from '@/components/menuLeft/index.vue';
+
+onMounted(() => {
+  console.log("index page onMounted")
+})
 
 </script>
 
