@@ -10,7 +10,7 @@ import * as base64 from '@protobufjs/base64';
 
 import protobufjs from 'protobufjs';
 import { getMapBase64 } from "@/utils/index";
-import { TopicMapT, OffsetWHT } from "@/interface/foxgloveThree";
+import { TopicMapT, TopicScanT } from "@/interface/foxgloveThree";
 
 import { MessageDefinitionField, MessageDefinition } from '@foxglove/message-definition';
 
@@ -32,7 +32,8 @@ type ResolvedChannel = {
 };
 
 type OptionT = {
-  mapDataChange: (data: TopicMapT) => void
+  mapDataChange: (data: TopicMapT) => void;
+  scanDataChange: (data: TopicScanT) => void;
 }
 export const useFoxgloveSocket = (linkUrl: string, rosNumber: string, options: OptionT) => {
   const msgInstance: Ref<any> = ref(null);
@@ -175,7 +176,8 @@ export const useFoxgloveSocket = (linkUrl: string, rosNumber: string, options: O
 
       // 激光雷达扫描数据
       if( subscriptionId === 0 && message) {
-        console.log("激光雷达扫描::", message)
+        console.log("激光雷达扫描::", message);
+        options.scanDataChange(message);
       }
     }
   });

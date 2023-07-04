@@ -111,7 +111,8 @@ nextTick(() => {
 const initPlayer = () => {
     if( renderer.value ) {
         const { client } = useFoxgloveSocket(linkUrl, rosNumber, {
-            mapDataChange: renderer.value.topicMapChage
+            mapDataChange: renderer.value.topicMapChage,
+            scanDataChange: renderer.value.topicScanChange
         });
         foxgloveClient.value = client;
     }

@@ -59,9 +59,9 @@ export class renderTopicMap {
   public initMap = (
     scene: THREE.Scene,
     mapInfo: TopicMapT,
-    camera: THREE.PerspectiveCamera | THREE.OrthographicCamera
+    object3D: THREE.Object3D
   ) => {
-    if (!scene || !mapInfo || !camera) {
+    if (!scene || !mapInfo) {
       throw new Error(`缺少scene、mapInfo参数.`);
     };
 
@@ -114,12 +114,8 @@ export class renderTopicMap {
         // 创建平面几何体，并应用材质
         const geometry = new THREE.PlaneGeometry(width / 100, height / 100);
         const mesh = new THREE.Mesh(geometry, material);
-    
-        // 旋转地图
-        const initialRotation = new THREE.Euler(THREE.MathUtils.degToRad(90), THREE.MathUtils.degToRad(0), 0);
-        mesh.rotation.copy(initialRotation);
-        // 将几何体添加到场景中
-        scene.add(mesh);
+
+        object3D.add(mesh);
       },
       undefined,
       (error) => {

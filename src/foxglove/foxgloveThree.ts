@@ -2,7 +2,7 @@
 import * as THREE from "three";
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 
-import { TopicMapT, OffsetWHT } from "@/interface/foxgloveThree";
+import { TopicMapT, OffsetWHT, TopicScanT } from "@/interface/foxgloveThree";
 
 import {renderTopicMap} from "@/foxglove/renderTopicMap";
 
@@ -11,6 +11,7 @@ import { initControls} from "./renderControls";
 import { initWebGal } from "./renderWebGl";
 import { initDirLight, initHemiLight } from "./renderLight";
 import { updateGrid } from "./renderGrid";
+import { updatePointCloud } from "./renderGeometry"
 
 export type FoxgloveThreeRendererT = {
     offsetWH: OffsetWHT;
@@ -19,7 +20,11 @@ export type FoxgloveThreeRendererT = {
     threeRenderDom: HTMLCanvasElement;
     webGLRender: THREE.WebGLRenderer;
     topicMapChage: (message: TopicMapT) => void;
+    topicScanChange: (message: TopicScanT) => void;
 };
+
+const positions: number | Iterable<number> | ArrayLike<number> | ArrayBuffer = []; // 顶点坐标数组
+const colors: number | Iterable<number> | ArrayLike<number> | ArrayBuffer = []; // 颜色数组
 
 // 相机的视角（fov）
 export const cameraFov = 45;
@@ -56,7 +61,19 @@ export class FoxgloveThreeRenderer implements FoxgloveThreeRendererT{
     // 网格
     public grid: THREE.GridHelper;
 
+    // 点云几何体
+    public pointCloudGeometry: THREE.BufferGeometry;
+    // 点云材质
+    public pointCloudMaterial: THREE.PointsMaterial;
+    // 创建点云对象
+    public pointCloud: THREE.Points;
+    public ranges: number;
+
+    // 包含点云和地图的parent
+    public object3DParent: THREE.Object3D;
+
     constructor({ threeRenderDom, width, height }: any) {
+        this.ranges = 0;
         // canvas的宽高和parent的宽高一样 保存起来
         this.offsetWH = { width, height };
 
@@ -101,7 +118,28 @@ export class FoxgloveThreeRenderer implements FoxgloveThreeRendererT{
         // 创建轨道控制器
         this.controls = new OrbitControls(getCamera.call(this), this.webGLRender.domElement);
 
-        this.pickingTarget = new THREE.WebGLRenderTarget(31, 31, {
+        // 初始化点云
+        // 创建点云的几何体 点云材质
+        this.pointCloudGeometry = new THREE.BufferGeometry();
+        this.pointCloudMaterial = new THREE.PointsMaterial({
+            size: 3, // 点的大小
+            vertexColors: true, // 开启顶点颜色
+            sizeAttenuation: false
+            // color: 0xffffff,
+        });
+        
+        this.pointCloud = new THREE.Points(this.pointCloudGeometry, this.pointCloudMaterial);
+        this.object3DParent = new THREE.Object3D();
+
+        // 将点云添加到Ovject3D中
+        this.object3DParent.add(this.pointCloud);
+
+        // 旋转
+        const initialRotation = new THREE.Euler(THREE.MathUtils.degToRad(90), THREE.MathUtils.degToRad(0), 0);
+        this.object3DParent.rotation.copy(initialRotation);
+        this.scene.add(this.object3DParent);
+
+        this.pickingTarget = new THREE.WebGLRenderTarget(this.offsetWH.width, this.offsetWH.height, {
             minFilter: THREE.NearestFilter,
             magFilter: THREE.NearestFilter,
             format: THREE.RGBAFormat, // stores objectIds as uint32
@@ -143,21 +181,27 @@ export class FoxgloveThreeRenderer implements FoxgloveThreeRendererT{
      */
     public topicMapChage = (message: TopicMapT) => {
         this.topicMapInfo = message;
-        
-        console.log("更新地图")
         // 更新网格
         updateGrid.call(this, message, getCamera.call(this));
 
         // 更新地图渲染
         this.renderTopicMapClass = new renderTopicMap();
-        this.renderTopicMapClass.initMap(this.scene, this.topicMapInfo, getCamera.call(this));
-        this.render();
+        this.renderTopicMapClass.initMap(this.scene, this.topicMapInfo, this.object3DParent);
+    };
+
+    /**
+     * foxglove client /scan event change id: 1
+     * @param message TopicScanT client接收到的信息
+     */
+    public topicScanChange = (message: TopicScanT) => {
+        updatePointCloud.call(this, message);
     };
 
     // 渲染Threejs场景
     private render = () => {
         requestAnimationFrame(this.render);
         this.controls.update();
+        
         this.webGLRender.render(this.scene, getCamera.call(this));
     };
 
