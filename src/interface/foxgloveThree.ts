@@ -130,3 +130,31 @@ export type LaserScan = {
   ranges: Float32Array;
   intensities: Float32Array;
 };
+
+export interface rotation {
+  x: number,
+  y: number,
+  z: number,
+  w: number
+}
+
+export interface translation {
+  x: number,
+  y: number,
+  z: number
+}
+
+export interface transform {
+  rotation: rotation,
+  translation: translation
+}
+
+export interface transforms {
+  header: Header,
+  child_frame_id: string,
+  transform: transform
+}
+
+export interface TopicTfT {
+  transforms: transforms[]
+}

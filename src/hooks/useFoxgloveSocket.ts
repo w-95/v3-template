@@ -10,7 +10,7 @@ import * as base64 from '@protobufjs/base64';
 
 import protobufjs from 'protobufjs';
 import { getMapBase64 } from "@/utils/index";
-import { TopicMapT, TopicScanT } from "@/interface/foxgloveThree";
+import { TopicMapT, TopicScanT, TopicTfT } from "@/interface/foxgloveThree";
 
 import { MessageDefinitionField, MessageDefinition } from '@foxglove/message-definition';
 
@@ -33,6 +33,7 @@ type ResolvedChannel = {
 
 type OptionT = {
   mapDataChange: (data: TopicMapT) => void;
+  topicTfChange: (data: TopicTfT) => void;
   scanDataChange: (data: TopicScanT) => void;
 }
 export const useFoxgloveSocket = (linkUrl: string, rosNumber: string, options: OptionT) => {
@@ -159,7 +160,7 @@ export const useFoxgloveSocket = (linkUrl: string, rosNumber: string, options: O
     // console.log('client on :::message event', subscriptionId, data);
     // receivedBytes.value += data.byteLength;
 
-    // /scan=1  /map=2  /move_base/GlobalPlanner/plan=3  /tf=4  /wayPoint=5
+    // /scan=1  /map=2  /move_base/GlobalPlanner /plan=3  /tf=4  /wayPoint=5
     const topicChanInfo = channelsById.value.get(subscriptionId + 1);
 
     if (topicChanInfo) {
@@ -178,6 +179,14 @@ export const useFoxgloveSocket = (linkUrl: string, rosNumber: string, options: O
       if( subscriptionId === 0 && message) {
         console.log("激光雷达扫描::", message);
         options.scanDataChange(message);
+        return;
+      };
+
+      // 机器人当前位置
+      if(subscriptionId === 3) {
+        console.log("机器人当前位置::", message);
+        options.topicTfChange(message);
+        return;
       }
     }
   });

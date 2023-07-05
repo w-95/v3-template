@@ -71,34 +71,6 @@ export class renderTopicMap {
     
     const grayImageInfo = getMapBase64(data, width, height);
 
-    // Unit8Array 的方式纹理贴图
-    // this.grayPlaneGeometry = new THREE.PlaneGeometry(width / 500, height / 500);
-
-    // const newData: BufferSource = data as BufferSource;
-    // console.log("更新地图 ::", mapInfo, grayImageInfo)
-    // const texture = new THREE.DataTexture(
-    //   grayImageInfo?.grayData? grayImageInfo.grayData :newData,
-    //   width / 500,
-    //   height / 500,
-    //   THREE.AlphaFormat,
-    //   THREE.UnsignedByteType
-    //   // THREE.RGBAFormat,
-    //   // THREE.UnsignedByteType
-    // );
-    // texture.needsUpdate = true;
-    // // 设置纹理选项
-    // texture.format = THREE.RGBAFormat; // 数据格式为RGB
-    // texture.minFilter = THREE.LinearFilter; // 设置纹理过滤器
-    // texture.magFilter = THREE.LinearFilter;
-
-    // this.planeMaterial = new THREE.MeshBasicMaterial({ map: texture });
-    // this.grayPlaneMesh = new THREE.Mesh(this.grayPlaneGeometry, this.planeMaterial);
-    // // 设置图层层级
-    // this.grayPlaneMesh.layers.enable(10);
-    // // 添加平面几何体到场景中
-    // scene.add(this.grayPlaneMesh);
-
-
     // base64的纹理方式贴图
     const textureLoader = new THREE.TextureLoader();
     textureLoader.load(
