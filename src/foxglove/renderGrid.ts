@@ -21,20 +21,8 @@ export const updateGrid = function (
   camera: THREE.Camera
 ) {
   const { info } = message;
-  const { width, height } = this.offsetWH;
-
-  // 目标宽高 => px
-  const targetWidthPx = info.width; 
-  const targetHeightPx = info.height;
-
-  const aspectRatio = width / height; // 窗口的宽高比
-
-  const distance = Math.abs(camera.position.z); // 相机距离场景原点的距离
-  const sceneWidth = 2 * distance * Math.tan(THREE.MathUtils.degToRad(cameraFov / 2)) * aspectRatio;
-  const sceneHeight = 2 * distance * Math.tan(THREE.MathUtils.degToRad(cameraFov / 2));
-
-  const targetWidth = (targetWidthPx / width) * sceneWidth; // 目标宽度（场景单位）
-  const targetHeight = (targetHeightPx / height) * sceneHeight; // 目标高度（场景单位）
-
-  this.grid.scale.set(targetWidth, targetHeight, 1);
+  const { width, height, resolution } = info;
+  const n = width > height ? height: width;
+  this.grid = new THREE.GridHelper( n / 10, 10 );
+  this.scene.add(this.grid); // 显示网格
 };

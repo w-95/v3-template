@@ -68,7 +68,7 @@ export const initCamera3D = function (
   this.controls.maxPolarAngle = Math.PI;
 
   // 设置相机位置
-  this.perspectiveCamera.position.set(5, 4, 3)
+  this.perspectiveCamera.position.set(13, 15, 10)
   this.perspectiveCamera.lookAt(this.scene.position);
 };
 

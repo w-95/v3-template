@@ -27,6 +27,7 @@ export const updatePointCloud = function (this: FoxgloveThreeRenderer, message: 
   const { angle_increment, angle_min, ranges } = message;
   const positionAttribute = this.pointCloudGeometry.getAttribute('position');
   const colorAttribute = this.pointCloudGeometry.getAttribute('color');
+  // positionAttribute.needsUpdate = true;
   // 创建顶点位置缓冲区
   let positionsGeometry = new Float32Array(ranges.length * 3); // 每个点有3个坐标（x, y, z）
   // 创建颜色缓冲区
@@ -48,6 +49,7 @@ export const updatePointCloud = function (this: FoxgloveThreeRenderer, message: 
     var range = message.ranges[index];
     let increment = (laserScan.end_angle - laserScan.start_angle) / (laserScan.ranges.length - 1);
     var angle = message.angle_min + (index * increment);
+    // const angle = message.angle_min + index * message.angle_increment;
     const x = range * Math.cos(angle); // 计算 x 坐标
     const y = range * Math.sin(angle); // 计算 y 坐标
 
@@ -80,6 +82,8 @@ export const updatePointCloud = function (this: FoxgloveThreeRenderer, message: 
   this.pointCloudGeometry.computeBoundingSphere();
   this.pointCloudGeometry.setAttribute('position', new THREE.BufferAttribute(positionsGeometry, 3));
   this.pointCloudGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+  this.pointGroup.add(this.pointCloud);
+  this.object3DParent.add(this.pointGroup)
 };
 
 

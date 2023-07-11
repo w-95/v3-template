@@ -168,23 +168,18 @@ export const useFoxgloveSocket = (linkUrl: string, rosNumber: string, options: O
       
       // 地图数据
       if( subscriptionId === 1 && message) {
-        const mapData = message.data;
-        const mapData64 = getMapBase64(mapData, message.info.width, message.info.height);
-        console.log('地图::', message, mapData64);
         options.mapDataChange(message);
         return;
       };
 
       // 激光雷达扫描数据
       if( subscriptionId === 0 && message) {
-        console.log("激光雷达扫描::", message);
         options.scanDataChange(message);
         return;
       };
 
       // 机器人当前位置
       if(subscriptionId === 3) {
-        console.log("机器人当前位置::", message);
         options.topicTfChange(message);
         return;
       }

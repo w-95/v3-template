@@ -2,7 +2,7 @@
 import * as THREE from "three";
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 
-import { TopicMapT, OffsetWHT, TopicScanT, TopicTfT } from "@/interface/foxgloveThree";
+import { TopicMapT, OffsetWHT, TopicScanT, TopicTfT, transforms } from "@/interface/foxgloveThree";
 
 import {renderTopicMap} from "@/foxglove/renderTopicMap";
 
@@ -12,6 +12,8 @@ import { initWebGal } from "./renderWebGl";
 import { initDirLight, initHemiLight } from "./renderLight";
 import { updateGrid } from "./renderGrid";
 import { updatePointCloud } from "./renderGeometry";
+
+import { ElMessage } from 'element-plus/lib/components/index.js';
 
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 
@@ -62,7 +64,7 @@ export class FoxgloveThreeRenderer implements FoxgloveThreeRendererT{
     public pickingTarget: THREE.WebGLRenderTarget;
 
     // 网格
-    public grid: THREE.GridHelper;
+    public grid: THREE.GridHelper | undefined;
 
     // 点云几何体
     public pointCloudGeometry: THREE.BufferGeometry;
@@ -71,6 +73,7 @@ export class FoxgloveThreeRenderer implements FoxgloveThreeRendererT{
     // 创建点云对象
     public pointCloud: THREE.Points;
     public ranges: number;
+    public pointGroup: THREE.Group;
 
     // 包含点云和地图的parent
     public object3DParent: THREE.Object3D;
@@ -81,6 +84,8 @@ export class FoxgloveThreeRenderer implements FoxgloveThreeRendererT{
     public robotRotation: THREE.Quaternion;
     // 机器人模型
     public robotModuleGltf: GLTFLoader;
+
+    public transformsTf: Map<string, transforms>;
 
     constructor({ threeRenderDom, width, height }: any) {
         this.ranges = 0;
@@ -100,10 +105,7 @@ export class FoxgloveThreeRenderer implements FoxgloveThreeRendererT{
 
         // 创建场景
         this.scene = new THREE.Scene();
-        this.scene.add(new THREE.AxesHelper(10)); // 显示坐标轴
-
-        this.grid = new THREE.GridHelper( 10, 10 )
-        this.scene.add(this.grid); // 显示网格
+        this.scene.add(new THREE.AxesHelper(20)); // 显示坐标轴
 
         // 创建相机
         this.perspectiveCamera = new THREE.PerspectiveCamera(45, width / height, 1, 500);
@@ -140,6 +142,8 @@ export class FoxgloveThreeRenderer implements FoxgloveThreeRendererT{
         
         this.pointCloud = new THREE.Points(this.pointCloudGeometry, this.pointCloudMaterial);
         this.object3DParent = new THREE.Object3D();
+        this.pointGroup = new THREE.Group();
+        this.pointGroup.add(this.pointCloud);
 
         this.robotPosition = new THREE.Vector3();
         this.robotRotation = new THREE.Quaternion();
@@ -148,11 +152,11 @@ export class FoxgloveThreeRenderer implements FoxgloveThreeRendererT{
         const translationVector = new THREE.Vector3().subVectors(this.robotPosition, this.object3DParent.position);
         this.object3DParent.position.add(translationVector);
         // 将点云添加到Ovject3D中
-        this.object3DParent.add(this.pointCloud);
+        this.object3DParent.add(this.pointGroup);
 
-        // 旋转
-        const initialRotation = new THREE.Euler(THREE.MathUtils.degToRad(90), THREE.MathUtils.degToRad(0), 0);
-        this.object3DParent.rotation.copy(initialRotation);
+        // // 旋转
+        // const initialRotation = new THREE.Euler(THREE.MathUtils.degToRad(90), THREE.MathUtils.degToRad(0), 0);
+        // this.object3DParent.rotation.copy(initialRotation);
 
         this.scene.add(this.object3DParent);
 
@@ -165,7 +169,7 @@ export class FoxgloveThreeRenderer implements FoxgloveThreeRendererT{
             generateMipmaps: false,
         });
 
-        
+        this.transformsTf = new Map();
 
         // class 实例
         this.renderTopicMapClass = null;
@@ -203,12 +207,23 @@ export class FoxgloveThreeRenderer implements FoxgloveThreeRendererT{
      */
     public topicMapChage = (message: TopicMapT) => {
         this.topicMapInfo = message;
+
+        // 将object3D的原点设置为图像的右上角
+        // this.object3DParent.position.set(message.info.width / 2 * message.info.resolution, -message.info.height / 2 * message.info.resolution, 0);
+        // this.object3DParent.position.set(message.info.origin.position.x, message.info.origin.position.y, 0);
+
         // 更新网格
         updateGrid.call(this, message, getCamera.call(this));
 
-        // 更新地图渲染
-        this.renderTopicMapClass = new renderTopicMap();
-        this.renderTopicMapClass.initMap(this.scene, this.topicMapInfo, this.object3DParent);
+        // 初始化地图渲染
+        if(!this.renderTopicMapClass) {
+            this.renderTopicMapClass = new renderTopicMap();
+            this.renderTopicMapClass.initMap(this.scene, this.topicMapInfo, this.object3DParent, this.transformsTf);
+        }else {
+            // const map = this.transformsTf.get("map")!;
+            // this.renderTopicMapClass.updateMap(map);
+        }
+        
     };
 
     /**
@@ -218,18 +233,34 @@ export class FoxgloveThreeRenderer implements FoxgloveThreeRendererT{
      */
     public topicTfChange = (message: TopicTfT) => {
         const { transforms } = message;
-        // 机器人当前位置
-        this.robotPosition.x = transforms[1].transform.translation.x;
-        this.robotPosition.y = transforms[1].transform.translation.y;
-        this.robotPosition.z = transforms[1].transform.translation.z;
-        // 机器人旋转角度
-        this.robotRotation.x = transforms[1].transform.rotation.x;
-        this.robotRotation.y = transforms[1].transform.rotation.y;
-        this.robotRotation.z = transforms[1].transform.rotation.z;
-        this.robotRotation.w = transforms[1].transform.rotation.w;
 
+        transforms.forEach((item) => this.transformsTf.set(item.header.frame_id, item));
+
+        // 更新地图
+        if(this.renderTopicMapClass) {
+            const map = this.transformsTf.get("map")!;
+            this.renderTopicMapClass.updateMap(map, this.object3DParent);
+        };
+
+        // 更新点云
+        if(this.pointCloudGeometry && this.pointGroup) {
+            const laser = this.transformsTf.get('laser')!;
+            const translation = laser.transform.translation;
+            const rotation = laser.transform.rotation;
+            this.pointGroup.position.set(translation.x, translation.y, translation.z);
+            this.pointGroup.quaternion.set(
+                rotation.x,
+                rotation.y,
+                rotation.z,
+                rotation.w
+            );
+        }
+        
+
+        // 设置机器人位置
         // this.robotModuleGltf.scene.position.set(this.robotPosition);
-        this.robotModuleGltf.quaternion.copy(this.robotRotation);
+        // 设置机器人角度
+        // this.robotModuleGltf.quaternion.copy(this.robotRotation);
     };
 
     /**
@@ -238,6 +269,7 @@ export class FoxgloveThreeRenderer implements FoxgloveThreeRendererT{
      * @param message TopicScanT client接收到的信息
      */
     public topicScanChange = (message: TopicScanT) => {
+        console.log("message::激光雷达", message)
         updatePointCloud.call(this, message);
     };
 
@@ -249,12 +281,19 @@ export class FoxgloveThreeRenderer implements FoxgloveThreeRendererT{
         this.webGLRender.render(this.scene, getCamera.call(this));
     };
 
+    test = () => {
+        if(this.renderTopicMapClass && this.renderTopicMapClass.mesh) {
+            this.renderTopicMapClass.mesh.rotation.x += 0.01;
+            this.renderTopicMapClass.mesh.rotation.y += 0.01;
+        }
+    }
+
     // 加载模型
     private loadModule = () => {
         const loader = new GLTFLoader();
         loader.load( '../src/assets/gltf/scene.gltf', ( gltf: GLTFLoader ) => {
             this.robotModuleGltf = gltf;
-            this.robotModuleGltf.scene.scale.set(0.08, 0.08, 0.08);
+            this.robotModuleGltf.scene.scale.set(0.2, 0.2, 0.2);
             this.robotModuleGltf.scene.position.set(0, 0, 0);
             this.scene.add( this.robotModuleGltf.scene );
         }, function() {
@@ -264,5 +303,5 @@ export class FoxgloveThreeRenderer implements FoxgloveThreeRendererT{
             console.error( '导入失败 -> ', error );
 
         } );
-    }
+    };
 }

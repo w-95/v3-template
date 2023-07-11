@@ -1,4 +1,3 @@
-import * as base64 from '@protobufjs/base64';
 import protobufjs from 'protobufjs';
 
 import { MessageDefinitionField, MessageDefinition } from '@foxglove/message-definition';

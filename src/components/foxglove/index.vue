@@ -11,7 +11,8 @@ import { useFoxgloveSocket } from '@/hooks/useFoxgloveSocket';
 
 import { rosNumber } from "@/data/foxgloveConfig";
 
-import { FoxgloveThreeRenderer, FoxgloveThreeRendererT } from "@/foxglove/foxgloveThree";
+// import { FoxgloveThreeRenderer, FoxgloveThreeRendererT } from "@/foxglove/foxgloveThree";
+import { FoxgloveThreeRenderer, FoxgloveThreeRendererT } from "@/threeRender/render";
 
 const linkUrl = `${import.meta.env.VITE_API_FOXGLOVE_SOCKET}?rosNumber=${encodeURIComponent(rosNumber)}`;
 
