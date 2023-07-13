@@ -1,33 +1,36 @@
 
 import * as THREE from "three";
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 
 import { TopicMapT, OffsetWHT, TopicScanT, TopicTfT, transforms, transform } from "@/interface/foxgloveThree";
 
 import { ThreeRenderMap } from "@/threeRender/map";
 import { ThreeRenderGrid } from "@/threeRender/grid";
 import { ThreeRenderGeometry } from "@/threeRender/geometry";
+import { ThreeRenderCamera } from "./camera";
+import { ThreeRenderControls } from "./controls";
+import { ThreeRenderWebgl } from "./webGlRender";
+import { ThreeRenderLight } from "./ligh";
+import { ThreeRenderModel } from "./model";
 
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
-import { ElMessage } from 'element-plus/lib/components/index.js';
+import * as TWEEN from '@tweenjs/tween.js'
 
+import meshLine from 'three.meshline';
 
 export type FoxgloveThreeRendererT = {
     offsetWH: OffsetWHT;
     renderType: '2D' | '3D';
     topicMapInfo:TopicMapT | null;
-    threeRenderDom: HTMLCanvasElement;
-    webGLRender: THREE.WebGLRenderer;
+    threeRenderDom: any;
+    scene: THREE.Scene;
     topicMapChage: (message: TopicMapT) => void;
     topicScanChange: (message: TopicScanT) => void;
     topicTfChange: (message: TopicTfT) => void;
 };
 
+export type robotInfoT = { x: number, y: number, angle: number, tfAngle: number };
+
 // 相机的视角（fov）
 export const cameraFov = 45;
-const UNIT_X = new THREE.Vector3(1, 0, 0);
-const UNIT_Z = new THREE.Vector3(0, 0, 1);
-const PI_2 = Math.PI / 2;
 
 export class FoxgloveThreeRenderer implements FoxgloveThreeRendererT{
 
@@ -35,36 +38,39 @@ export class FoxgloveThreeRenderer implements FoxgloveThreeRendererT{
     public offsetWH: OffsetWHT;
     // 渲染的类型：2D || 3D
     public renderType: '2D' | '3D';
+
     // 当前/Map的信息
     public topicMapInfo:TopicMapT | null;
-    // 当前/transform的信息
+    // 当前/tf的信息
     public topicTfInfo: Map<string, transforms>;
     // 当前 /scan的信息
     public topicScanInfo: TopicScanT | null
+
     // 当前渲染的canvas元素
-    public readonly threeRenderDom: HTMLCanvasElement;
-    // 渲染器
-    public readonly webGLRender: THREE.WebGLRenderer;
+    public readonly threeRenderDom: any;
     // 场景
     public scene: THREE.Scene;
-    // 相机
-    public perspectiveCamera: THREE.PerspectiveCamera;
-    public orthographicCamera: THREE.OrthographicCamera;
-    // 相机组
-    public cameraGroup: THREE.Group;
-    // 轨道控制器
-    public controls: any;
+    
     // 渲染地图类的实例
-    private renderTopicMapClass: ThreeRenderMap | null;
+    private mapInstance: ThreeRenderMap;
     // 辅助网格类实例
-    private renderGridClass: ThreeRenderGrid | null;
+    private gridInstance: ThreeRenderGrid;
     // 渲染激光点云类的实例
-    private renderPointClass: ThreeRenderGeometry | null;
-    // 平行光
-    private directionalLight: THREE.DirectionalLight;
-    private hemiLight: THREE.HemisphereLight;
+    private pointInstance: ThreeRenderGeometry;
+    // 相机类实例
+    private cameraInstance: ThreeRenderCamera;
+    // 轨道控制器类
+    private controlsInstance: ThreeRenderControls;
+    // webGl渲染器类
+    private webGlInstance: ThreeRenderWebgl;
+    // 灯光实例
+    private lightInstance: ThreeRenderLight;
+    // 模型实例
+    private modelInstance: ThreeRenderModel;
 
-    public robotModuleGltf: GLTFLoader;
+    // 坐标线 机器人 - odom - map
+    private positionLine: any;
+    private robotInfo: robotInfoT;
 
     // 坐标系
     public mapObject3D: THREE.Object3D;
@@ -73,7 +79,7 @@ export class FoxgloveThreeRenderer implements FoxgloveThreeRendererT{
     public baseLinkObject3D: THREE.Object3D;
     public laserObject3D: THREE.Object3D;
 
-    constructor({ threeRenderDom, width, height }: any) {
+    constructor({ threeRenderDom, width, height }: { threeRenderDom: any, width: number, height: number}) {
         this.offsetWH = { width, height };
 
         this.renderType = "3D";
@@ -84,33 +90,7 @@ export class FoxgloveThreeRenderer implements FoxgloveThreeRendererT{
 
         this.threeRenderDom = threeRenderDom;
 
-        this.webGLRender = new THREE.WebGLRenderer({
-            canvas: threeRenderDom,
-            alpha: true,
-            antialias: true,
-        });
-
         this.scene = new THREE.Scene();
-
-        this.cameraGroup = new THREE.Group();
-        this.cameraGroup.position.set(0, 0, 0)
-        this.cameraGroup.lookAt(this.scene.position);
-        this.cameraGroup.quaternion.set(0, 0, 0, 1);
-        // this.perspectiveCamera = new THREE.PerspectiveCamera(45, width / height, 1, 500);
-        this.perspectiveCamera = new THREE.PerspectiveCamera(75, width / height, .1, 500);
-        this.orthographicCamera = new THREE.OrthographicCamera();
-        this.cameraGroup.add(this.perspectiveCamera);
-
-        // 创建灯光
-        this.directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-        this.hemiLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.5);
-
-        // 创建轨道控制器
-        this.controls = new OrbitControls(this.getCamera(), this.webGLRender.domElement);
-
-        this.renderTopicMapClass = null;
-        this.renderGridClass = null;
-        this.renderPointClass = null;
 
         this.mapObject3D = new THREE.Object3D();
         this.odomObject3D = new THREE.Object3D();
@@ -132,34 +112,45 @@ export class FoxgloveThreeRenderer implements FoxgloveThreeRendererT{
 
         this.mapObject3D.add(this.odomObject3D);
         this.odomObject3D.add(this.baseFootprintObject3D);
-        this.baseFootprintObject3D.add(this.baseLinkObject3D);
-        this.baseLinkObject3D.add(this.laserObject3D);
+
+        this.cameraInstance = new ThreeRenderCamera(width, height, this.scene);
+
+        const camera = this.cameraInstance.getCamera(this.renderType);
+
+        this.mapInstance = new ThreeRenderMap();
+        this.gridInstance = new ThreeRenderGrid();
+        this.pointInstance = new ThreeRenderGeometry();
+        
+        this.webGlInstance = new ThreeRenderWebgl(this.threeRenderDom, width, height);
+        this.controlsInstance = new ThreeRenderControls(camera, this.webGlInstance.webGLRender);
+        this.lightInstance = new ThreeRenderLight(this.scene);
+        this.modelInstance = new ThreeRenderModel(this.mapObject3D);
+
+        this.webGlInstance.render(this.scene, camera)
+        // this.baseFootprintObject3D.add(this.baseLinkObject3D);
+        // this.baseLinkObject3D.add(this.laserObject3D);
+
+        this.checkRenderType(this.renderType);
 
         /**
          * @TODO 
          * GridHelper是一个用于显示网格的辅助类，它的网格默认是基于X和Z轴的平面网格。它的网格线默认与Y轴对齐，而X和Z轴是水平平铺的。
          * 而PlaneGeometry是一个平面几何体，它的默认坐标系是基于X、Y和Z轴的。平面几何体的默认位置是位于XZ平面，其法线指向Y轴正方向。
          */
-        const initialRotation = new THREE.Euler(THREE.MathUtils.degToRad(90), THREE.MathUtils.degToRad(0), 0);
-        // this.scene.rotation.copy(initialRotation);                                                                 
+        // const initialRotation = new THREE.Euler(THREE.MathUtils.degToRad(90), THREE.MathUtils.degToRad(0), THREE.MathUtils.degToRad(180));
+        // this.mapObject3D.rotation.copy(initialRotation);
         
-        this.scene.add(new THREE.AxesHelper(5)); // 显示坐标轴
-        this.scene.add(this.cameraGroup);
+        this.positionLine = null;
+
+        this.robotInfo = {
+            x: 0,
+            y: 0,
+            angle: 0,
+            tfAngle: 0
+        };
+        
+        this.scene.add(new THREE.AxesHelper(5));
         this.scene.add(this.mapObject3D);
-        
-        this.initSetting();
-        
-        this.render();
-    };
-
-    private getCamera = () => this.renderType === "3D" ? this.perspectiveCamera : this.orthographicCamera;
-
-    public initSetting = () => {
-        
-        this.initSettingWebGl();
-        this.initSettingCamera3D();
-        this.initSetttingControls();
-        this.initSettingDirLight();
     };
 
     /**
@@ -172,34 +163,27 @@ export class FoxgloveThreeRenderer implements FoxgloveThreeRendererT{
 
         const { origin, resolution, width, height } = message.info;
 
-        // 实例地图
-        if(!this.renderTopicMapClass) {
-            const [threeOriginX, threeOriginY] = [width * resolution, height * resolution];
-            var position = new THREE.Vector3(threeOriginX / 2 + origin.position.x,  -threeOriginY / 2 - origin.position.y, 0);
-            const { x: rx, y: ry, z: rz, w: rw } = origin.orientation;
-            var quaternion = new THREE.Quaternion(rx, ry, rz, rw);
+        // 加载地图
+        const [threeOriginX, threeOriginY] = [width * resolution, height * resolution];
+        var position = new THREE.Vector3(threeOriginX / 2 + origin.position.x,  -threeOriginY / 2 - origin.position.y, 0);
+
+        // 设置地图的起点
+        this.mapObject3D.position.copy(position);
             
-            this.mapObject3D.position.copy(position);
-            this.mapObject3D.quaternion.copy(quaternion);
-            this.renderTopicMapClass = new ThreeRenderMap( message, this.mapObject3D);
-            this.loadModule();
+        // 初始化地图
+        this.mapInstance.initMapMesh(message).then((mesh: THREE.Mesh) => {
+            this.mapObject3D.add(mesh);
+            this.mapObject3D.updateMatrixWorld();
+        });
+            
+        // 添加线 将机器人、map、odom连接起来
+        this.createLineToMap_oDom();
 
-        }else {
-            // 更换了地图？
-            this.renderTopicMapClass = null;
-            this.scene.clear();
-            // this.renderTopicMapClass = new ThreeRenderMap( message, this.mapObject3D );
-        };
+        // 为map坐标添加一个label标识
+        this.addLabel_object3D(this.mapObject3D, "map", "", new THREE.Vector3(-(threeOriginX / 2 + origin.position.x),  -(-threeOriginY / 2 - origin.position.y), 0));
 
-        // 将模型设置到原点位置
-        if(this.robotModuleGltf) {
-            this.robotModuleGltf.scene.position.set(-origin.position.x, -origin.orientation.y, -origin.position.z);
-        };
-
-        // 实例辅助网格
-        if(!this.renderGridClass) {
-            this.renderGridClass = new ThreeRenderGrid(message, this.mapObject3D);
-        };
+        // 设置辅助网格
+        // this.mapObject3D.add(this.gridInstance.initGrid(message))
     };
 
     /**
@@ -209,12 +193,12 @@ export class FoxgloveThreeRenderer implements FoxgloveThreeRendererT{
      */
     public topicTfChange = (message: TopicTfT) => {
         const { transforms } = message;
-        console.log(message)
         
         transforms.forEach((item) => {
             this.topicTfInfo.set(item.header.frame_id, item)
             if(item.header.frame_id === 'map') {
                 this.updateObject3D(item.transform, this.odomObject3D, this.mapObject3D);
+                
             }else if(item.header.frame_id === 'odom') {
                 // this.updateObject3D(item.transform, this.baseFootprintObject3D, this.odomObject3D);
             }else if(item.header.frame_id === 'base_footprint') {
@@ -225,20 +209,144 @@ export class FoxgloveThreeRenderer implements FoxgloveThreeRendererT{
                 // this.updateObject3D(item.transform, this.laserObject3D);
             }
         });
-
         
-        const baseLinkInfo =  this.topicTfInfo.get("base_link");
+        const {robotAngle, x, y, tfAngle} = this.getRototPosition();
 
-        if(!this.renderPointClass && this.topicScanInfo && baseLinkInfo) {
-            this.renderPointClass = new ThreeRenderGeometry(this.topicScanInfo, this.mapObject3D, baseLinkInfo);
-            this.mapObject3D.updateMatrixWorld();
+        // 更新地图 角度
+        if(this.mapObject3D) {
+            const initialRotation = new THREE.Euler(THREE.MathUtils.degToRad(0), THREE.MathUtils.degToRad(0), THREE.MathUtils.degToRad(-Math.round((Math.atan(robotAngle) * 180))));
+            // this.mapObject3D.rotation.copy(initialRotation);
+            let startRotation = { z: this.mapObject3D.rotation.z };
+            let endRotation = { z: -Math.round((Math.atan(tfAngle) * 360) / Math.PI) };
+
+            new TWEEN.Tween(startRotation)
+            .to({ z: endRotation}, 300)
+            .onUpdate( () => {
+                this.mapObject3D.rotation.z = startRotation.z
+            })
+            .start();
         };
+
+       
+        if(this.modelInstance?.robotModuleGltf) {
+            // 更新机器人位置
+            const { x: map3Dx, y: map3Dy, z: map3Dz } = this.mapObject3D.position;
+            this.modelInstance.robotModuleGltf.scene.position.set(-map3Dx + x, -map3Dy - y, map3Dz);
+
+            // 更新连接机器人线的点位
+            this.updateLineToMap_oDom();
+
+            // 旋转机器人
+            // this.modelInstance.robotModuleGltf.scene.rotateY(robotAngle);
+            this.modelInstance.rotateModel( -Math.round((Math.atan(robotAngle) * 360) / Math.PI))
+        };
+    };
+    
+    /**
+     * foxglove client /scan event change id: 1
+     * @TODO 激光雷达 ---- 点云
+     * @param message TopicScanT client接收到的信息
+     */
+    public topicScanChange = (message: TopicScanT) => {
+        this.topicScanInfo = message;
+
+        // 更新点云
+        this.pointInstance.drawPoint(message).then((group: THREE.Group) => {
+            this.mapObject3D.add(group);
+            this.mapObject3D.updateMatrixWorld();
+        });
+    };
+
+    // 为某个object3D 添加一个label
+    private addLabel_object3D = (object: THREE.Object3D, labelName:string, color: string='#010112', position: any) => {
+        const labelCanvas = document.createElement('canvas');
+        labelCanvas.width = 50;
+        labelCanvas.height = 50;
+        labelCanvas.style.backgroundColor = "#FFF";
+        const labelContext = labelCanvas.getContext('2d')!;
+        labelContext.font = 'Bold 20px ';
+        labelContext.fillStyle = color;
+        labelContext.fillText(labelName, 0, 20);
         
-        this.getRototPosition();
+        // 将Canvas转换为纹理
+        var labelTexture = new THREE.Texture(labelCanvas);
+        labelTexture.needsUpdate = true;
+        
+        // 创建Sprite以容纳标签
+        var labelMaterial = new THREE.SpriteMaterial({ map: labelTexture });
+        var labelSprite = new THREE.Sprite(labelMaterial);
+        labelSprite.position.copy(position);
+        labelSprite.scale.set(3, 3, 3); // 调整Sprite的大小
+        
+        // 将Sprite附加到Object3D上
+        object.add(labelSprite);
+    };
+
+    // 根据坐标系关系更新坐标和角度
+    private updateObject3D = (transformInfo: transform, Object3D: THREE.Object3D, parentOvjec3D: THREE.Object3D) => {
+        if(!this.topicMapInfo) return;
+
+        const { x: tfx, y: tfy, z: tfz} = transformInfo.translation;
+        // ElMessage(`${threeOriginX}, : ${threeOriginY}`)
+        const { x: px, y: py, z: pz } = parentOvjec3D.position;
+        const position = new THREE.Vector3(-px + tfx, -py - tfy, 0)
+        // var quaternion = new THREE.Quaternion(-r.x, -r.y, -r.z, -r.w);
+        // 将点云从ROS坐标系转换到Three.js坐标系
+        // position.applyQuaternion(this.baseLinkObject3D.quaternion);
+        // position.add(this.baseLinkObject3D.position);
+        // quaternion.multiply(this.baseLinkObject3D.quaternion);
+        
+        Object3D.position.copy(position);
+        // Object3D.quaternion.copy(quaternion);
+    };
+
+    private updateLineToMap_oDom = () => {
+        const { robotModuleGltf } = this.modelInstance;
+
+        if(robotModuleGltf) {
+            const positions = [
+                new THREE.Vector3(robotModuleGltf.scene.position.x, robotModuleGltf.scene.position.y, robotModuleGltf.scene.position.z),
+                new THREE.Vector3(this.odomObject3D.position.x, this.odomObject3D.position.y, this.odomObject3D.position.z),
+                new THREE.Vector3(-this.mapObject3D.position.x, -this.mapObject3D.position.y, this.mapObject3D.position.z)
+            ];
+            const geometry = new THREE.BufferGeometry().setFromPoints(positions);
+            this.positionLine.setGeometry(geometry);
+        };
+    };
+
+    // 创建机器人、map、odom坐标的线 将它们连起来
+    private createLineToMap_oDom = () => {
+        if( this.modelInstance?.robotModuleGltf) {
+            const { robotModuleGltf } = this.modelInstance;
+
+            const positions = [
+                new THREE.Vector3(robotModuleGltf.scene.position.x, robotModuleGltf.scene.position.y, robotModuleGltf.scene.position.z),
+                new THREE.Vector3(this.odomObject3D.position.x, this.odomObject3D.position.y, this.odomObject3D.position.z),
+                new THREE.Vector3(-this.mapObject3D.position.x, -this.mapObject3D.position.y, this.mapObject3D.position.z)
+            ];
+            const geometry = new THREE.BufferGeometry().setFromPoints(positions);
+    
+            // 创建线对象
+            this.positionLine = new meshLine.MeshLine();
+            this.positionLine.setGeometry(geometry);
+    
+            // 创建线段材质
+            const material = new meshLine.MeshLineMaterial({
+                color: new THREE.Color(0xffff00),
+                lineWidth: .2, // 设置线宽
+                dashRatio: 0.95,
+                circles: true
+            });
+    
+            // 创建线段网格
+            const mesh = new THREE.Mesh(this.positionLine, material);
+            // 将线对象添加到场景中
+            this.mapObject3D.add(mesh);
+        }
     };
 
     // 获取机器人当前位置
-    private getRototPosition = () => {
+    private getRototPosition = (): { x: number, y: number, robotAngle: number, tfAngle: number } => {
         const map = this.topicTfInfo.get('map');
         const odom = this.topicTfInfo.get("odom");
         const { info } = this.topicMapInfo!;
@@ -246,14 +354,13 @@ export class FoxgloveThreeRenderer implements FoxgloveThreeRendererT{
         if(odom && map && info) {
             // 获取四元数
             const { x: qx, y: qy, z: qz, w: qw } = odom.transform.rotation; // odom -> basefootprint
-
             const { x: mx, y: my, z: mz, w: mw } = map.transform.rotation; // map -> odom
 
             // 获取角度
             const odomAngle = 2 * Math.atan2(Math.sqrt(qx * qx + qy * qy + qz * qz), qw) * (180 / Math.PI);
             const mapAngle = 2 * Math.atan2(Math.sqrt(mx* mx + my * my + mz * mz), mw) * (180 / Math.PI);
 
-            // mpa => odom 的角度
+            // map => odom 的角度
             const mapAngle_TF = Math.atan2(2 * (mw * mz + mx * my), 1 - 2 * (my * my + mz * mz)) * (180 / Math.PI);
             const odomAngle_TF = Math.atan2(2 * (qw * qz + qx * qy), 1 - 2 * (qy * qy + qz * qz)) * (180 / Math.PI);
 
@@ -276,197 +383,17 @@ export class FoxgloveThreeRenderer implements FoxgloveThreeRendererT{
 
             const [x, y] = [x2 + tx, y2 + ty ];
 
-            // 旋转地图
-            // THREE.MathUtils.degToRad(-Math.round((Math.atan(tfAngle) * 180) / Math.PI
-            const initialRotation = new THREE.Euler(THREE.MathUtils.degToRad(0), THREE.MathUtils.degToRad(0), THREE.MathUtils.degToRad(-Math.round((Math.atan(robotAngle) * 180) / Math.PI)));
-            this.scene.rotation.copy(initialRotation);
-
-
-            // 更新机器人位置
-            const { x: map3Dx, y: map3Dy, z: map3Dz } = this.mapObject3D.position;
-            if(this.robotModuleGltf) {
-                this.robotModuleGltf.scene.position.set(-map3Dx + x, -map3Dy - y, map3Dz);
-            };
-
-            console.log('地图起点::', info.origin.position);
-            console.log("robot x:", x, "robot y", y, 'robot angle:', robotAngle);
-            return { x, y, robotAngle, mapAngle_TF };
-
+            this.robotInfo = { x, y, angle: robotAngle, tfAngle: mapAngle_TF };
+            return { x, y, robotAngle, tfAngle };
         };
-        return { x: 0, y: 0, robotAngle: 0, mapAngle_TF: 0 };
+        return { x: 0, y: 0, robotAngle: 0, tfAngle: 0 };
     };
-
-    private addTopicName = (transformInfo: transform) => {
-
-    };
-
-    // 根据坐标系关系更新坐标和角度
-    private updateObject3D = (transformInfo: transform, Object3D: THREE.Object3D, parentOvjec3D: THREE.Object3D) => {
-        if(!this.topicMapInfo) return;
-
-        const { x: tfx, y: tfy, z: tfz} = transformInfo.translation;
-        // ElMessage(`${threeOriginX}, : ${threeOriginY}`)
-        const { x: px, y: py, z: pz } = parentOvjec3D.position;
-        const position = new THREE.Vector3(-px + tfx, -py - tfy, 0)
-        // var quaternion = new THREE.Quaternion(-r.x, -r.y, -r.z, -r.w);
-        // 将点云从ROS坐标系转换到Three.js坐标系
-        // position.applyQuaternion(this.baseLinkObject3D.quaternion);
-        // position.add(this.baseLinkObject3D.position);
-        // quaternion.multiply(this.baseLinkObject3D.quaternion);
-        
-        Object3D.position.copy(position);
-        // Object3D.quaternion.copy(quaternion);
-    };
-
-    /**
-     * foxglove client /scan event change id: 1
-     * @TODO 激光雷达 ---- 点云
-     * @param message TopicScanT client接收到的信息
-     */
-    public topicScanChange = (message: TopicScanT) => {
-
-        this.topicScanInfo = message;
-
-        const baseLinkInfo = this.topicTfInfo.get('base_link')
-        if(!this.renderPointClass && this.topicTfInfo && this.topicScanInfo && baseLinkInfo) {
-            this.renderPointClass = new ThreeRenderGeometry(message, this.mapObject3D, baseLinkInfo);
-
-            this.mapObject3D.updateMatrixWorld();
-        };
-    };
-
-    // 渲染Threejs场景
-    private render = () => {
-        requestAnimationFrame(this.render);
-        this.controls.update();
-        
-        this.webGLRender.render(this.scene, this.getCamera());
-    };
+    
 
     // 切换相机
-    private checkRenderType = (mode: Extract<FoxgloveThreeRendererT, 'renderType'>) => {
+    private checkRenderType = (mode: '2D' | '3D') => {
         this.renderType = mode;
-        mode === '2D'? this.initSettingCamera2D(): this.initSettingCamera3D();
+        this.cameraInstance.checkCamera(mode, this.controlsInstance.controls, this.scene, this.offsetWH.width, this.offsetWH.height)
     };
 
-    // 加载模型
-    private loadModule = () => {
-        const loader = new GLTFLoader();
-        loader.load( '../src/assets/gltf/scene.gltf', ( gltf: GLTFLoader ) => {
-            this.robotModuleGltf = gltf;
-            this.robotModuleGltf.scene.scale.set(0.2, 0.2, 0.2);
-            
-            const initialRotation = new THREE.Euler(THREE.MathUtils.degToRad(90), THREE.MathUtils.degToRad(0), THREE.MathUtils.degToRad(0));
-            this.robotModuleGltf.scene.rotation.copy(initialRotation);
-
-            if(this.topicMapInfo && this.topicMapInfo?.info) {
-                this.robotModuleGltf.scene.position.set(0, 0, 0);
-            }else {
-                this.robotModuleGltf.scene.position.set(0, 0, 0);
-            }
-            this.mapObject3D.add( this.robotModuleGltf.scene );
-        }, function() {
-            console.log("正在导入 ...")
-        }, function ( error: any ) {
-            console.error( '导入失败 -> ', error );
-        } );
-    };
-
-    // 初始化设置webGl
-    private initSettingWebGl = () => {
-        // 普通计算机显示器或者移动设备屏幕等低动态范围介质上，模拟、逼近高动态范围（HDR）效果
-        this.webGLRender.toneMapping = THREE.NoToneMapping;
-        // 定义渲染器是否在渲染每一帧之前自动清除其输出。
-        this.webGLRender.autoClear = false;
-        // /// 自定义模式重置
-        this.webGLRender.info.autoReset = false;
-        // // 是否允许在场景中使用阴影贴图
-        this.webGLRender.shadowMap.enabled = false;
-        // 定义阴影贴图类型
-        this.webGLRender.shadowMap.type = THREE.VSMShadowMap;
-        // 渲染器是否应对对象进行排序。默认是true.
-        this.webGLRender.sortObjects = true;
-        // 设置设备像素比。通常用于避免HiDPI设备上绘图模糊
-        this.webGLRender.setPixelRatio(window.devicePixelRatio);
-        this.webGLRender.setSize(this.offsetWH.width, this.offsetWH.height);
-    };
-
-    // 初始化设置平行光
-    private initSettingDirLight = () => {
-        this.directionalLight.position.set(1, 2, 1);
-        this.directionalLight.castShadow = true;
-        this.directionalLight.layers.enableAll();
-    
-        this.directionalLight.shadow.mapSize.width = 2048;
-        this.directionalLight.shadow.mapSize.height = 2048;
-        this.directionalLight.shadow.camera.near = 0.5;
-        this.directionalLight.shadow.camera.far = 500;
-        this.directionalLight.shadow.bias = -0.00001;
-
-        this.scene.add(this.directionalLight);
-        this.scene.add(this.hemiLight)
-    };
-
-    // 初始化设置轨道控制器
-    private initSetttingControls = () => {
-        this.controls.screenSpacePanning = false; // only allow panning in the XY plane
-        this.controls.mouseButtons.LEFT = THREE.MOUSE.PAN;
-        this.controls.mouseButtons.RIGHT = THREE.MOUSE.ROTATE;
-        this.controls.touches.ONE = THREE.TOUCH.PAN;
-        this.controls.touches.TWO = THREE.TOUCH.DOLLY_ROTATE;
-
-        this.controls.keys = { LEFT: "KeyA", RIGHT: "KeyD", UP: "KeyW", BOTTOM: "KeyS" };
-        this.controls.listenToKeyEvents(this.threeRenderDom);
-        // this.controls.enableRotate = true;  // 允许旋转
-        // this.controls.enableZoom = false;   // 禁用缩放
-        // this.controls.enablePan = true;     // 允许平移
-    };
-
-    // 初始化设置3D相机
-    private initSettingCamera3D = () => {
-        const targetOffset = new THREE.Vector3();
-        targetOffset.fromArray([0, 0, 0]);
-        const tempSpherical = new THREE.Spherical();
-        const phi = THREE.MathUtils.degToRad( THREE.MathUtils.radToDeg(this.controls.getPolarAngle()));
-        const theta = -THREE.MathUtils.degToRad(THREE.MathUtils.radToDeg(-this.controls.getAzimuthalAngle()));
-        tempSpherical.set(this.controls.getDistance(), phi, theta);
-      
-        this.perspectiveCamera.position.setFromSpherical(tempSpherical).applyAxisAngle(UNIT_X, PI_2);
-        this.perspectiveCamera.position.add(targetOffset);
-      
-        this.perspectiveCamera.quaternion.setFromEuler(new THREE.Euler().set(phi, 0, theta, "ZYX"));
-        this.perspectiveCamera.fov = cameraFov;
-        this.perspectiveCamera.near = 0.5;
-        this.perspectiveCamera.far = 5000;
-        this.perspectiveCamera.aspect = this.offsetWH.width / this.offsetWH.height;
-        this.perspectiveCamera.updateProjectionMatrix();
-      
-        this.controls.target.copy(targetOffset);
-        this.controls.minPolarAngle = 0;
-        this.controls.maxPolarAngle = Math.PI;
-      
-        // 设置相机位置
-        this.perspectiveCamera.position.set(13, 15, 10)
-        this.perspectiveCamera.lookAt(this.scene.position);
-    };
-      
-    // 初始化设置2D相机
-    private initSettingCamera2D = () => {
-        const targetOffset = new THREE.Vector3();
-        targetOffset.fromArray([0, 0, 0]);
-        const phi = THREE.MathUtils.degToRad( THREE.MathUtils.radToDeg(this.controls.getPolarAngle()));
-        const theta = -THREE.MathUtils.degToRad( THREE.MathUtils.radToDeg(-this.controls.getAzimuthalAngle()));
-        const curPolarAngle = THREE.MathUtils.degToRad(phi);
-        this.controls.minPolarAngle = this.controls.maxPolarAngle = curPolarAngle;
-      
-        this.orthographicCamera.position.set(targetOffset.x, targetOffset.y, 5000 / 2);
-        this.orthographicCamera.quaternion.setFromAxisAngle(UNIT_Z, theta);
-        this.orthographicCamera.left = (-this.controls.getDistance() / 2) * (this.offsetWH.width / this.offsetWH.height);
-        this.orthographicCamera.right = (this.controls.getDistance() / 2) * (this.offsetWH.width / this.offsetWH.height);
-        this.orthographicCamera.top = this.controls.getDistance() / 2;
-        this.orthographicCamera.bottom = -this.controls.getDistance() / 2;
-        this.orthographicCamera.near = 0.5;
-        this.orthographicCamera.far = 5000;
-        this.orthographicCamera.updateProjectionMatrix();
-    };
 }
