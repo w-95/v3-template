@@ -27,7 +27,7 @@ export type FoxgloveThreeRendererT = {
     topicTfChange: (message: TopicTfT) => void;
 };
 
-export type robotInfoT = { x: number, y: number, angle: number, tfAngle: number };
+export type robotInfoT = { x: number, y: number, angle: number, tfMapAngle: number, tfOdomAngle: number, [x:string]: any };
 
 // 相机的视角（fov）
 export const cameraFov = 45;
@@ -73,6 +73,7 @@ export class FoxgloveThreeRenderer implements FoxgloveThreeRendererT{
     private robotInfo: robotInfoT;
 
     // 坐标系
+    public globalObject3D: THREE.Object3D;
     public mapObject3D: THREE.Object3D;
     public odomObject3D: THREE.Object3D;
     public baseFootprintObject3D: THREE.Object3D;
@@ -92,6 +93,7 @@ export class FoxgloveThreeRenderer implements FoxgloveThreeRendererT{
 
         this.scene = new THREE.Scene();
 
+        this.globalObject3D = new THREE.Object3D();
         this.mapObject3D = new THREE.Object3D();
         this.odomObject3D = new THREE.Object3D();
         this.baseFootprintObject3D = new THREE.Object3D();
@@ -100,18 +102,23 @@ export class FoxgloveThreeRenderer implements FoxgloveThreeRendererT{
 
         const mapAxes = new THREE.AxesHelper(5);
         const odomAxes = new THREE.AxesHelper(5);
-        const baseFootprintAxes = new THREE.AxesHelper(5);
+        const baseFootprintAxes = new THREE.AxesHelper(15);
         const baseLinkAxes = new THREE.AxesHelper(5);
         const laserAxes = new THREE.AxesHelper(5);
 
+        this.globalObject3D.add(new THREE.AxesHelper(5))
         this.mapObject3D.add(mapAxes);
         this.odomObject3D.add(odomAxes);
         this.baseFootprintObject3D.add(baseFootprintAxes);
         this.baseLinkObject3D.add(baseLinkAxes);
         this.laserObject3D.add(laserAxes);
 
+        
+        this.globalObject3D.add(this.mapObject3D);
         this.mapObject3D.add(this.odomObject3D);
         this.odomObject3D.add(this.baseFootprintObject3D);
+        this.baseFootprintObject3D.add(this.baseLinkObject3D);
+        this.baseLinkObject3D.add(this.laserObject3D);
 
         this.cameraInstance = new ThreeRenderCamera(width, height, this.scene);
 
@@ -127,8 +134,7 @@ export class FoxgloveThreeRenderer implements FoxgloveThreeRendererT{
         this.modelInstance = new ThreeRenderModel(this.mapObject3D);
 
         this.webGlInstance.render(this.scene, camera)
-        // this.baseFootprintObject3D.add(this.baseLinkObject3D);
-        // this.baseLinkObject3D.add(this.laserObject3D);
+        
 
         this.checkRenderType(this.renderType);
 
@@ -146,11 +152,12 @@ export class FoxgloveThreeRenderer implements FoxgloveThreeRendererT{
             x: 0,
             y: 0,
             angle: 0,
-            tfAngle: 0
+            tfMapAngle: 0,
+            tfOdomAngle: 0
         };
         
-        this.scene.add(new THREE.AxesHelper(5));
-        this.scene.add(this.mapObject3D);
+        // this.scene.add(new THREE.AxesHelper(5));
+        this.scene.add(this.globalObject3D);
     };
 
     /**
@@ -170,7 +177,7 @@ export class FoxgloveThreeRenderer implements FoxgloveThreeRendererT{
         // 设置地图的起点
         this.mapObject3D.position.copy(position);
             
-        // 初始化地图
+        // // 初始化地图
         this.mapInstance.initMapMesh(message).then((mesh: THREE.Mesh) => {
             this.mapObject3D.add(mesh);
             this.mapObject3D.updateMatrixWorld();
@@ -178,9 +185,6 @@ export class FoxgloveThreeRenderer implements FoxgloveThreeRendererT{
             
         // 添加线 将机器人、map、odom连接起来
         this.createLineToMap_oDom();
-
-        // 为map坐标添加一个label标识
-        this.addLabel_object3D(this.mapObject3D, "map", "", new THREE.Vector3(-(threeOriginX / 2 + origin.position.x),  -(-threeOriginY / 2 - origin.position.y), 0));
 
         // 设置辅助网格
         // this.mapObject3D.add(this.gridInstance.initGrid(message))
@@ -198,35 +202,29 @@ export class FoxgloveThreeRenderer implements FoxgloveThreeRendererT{
             this.topicTfInfo.set(item.header.frame_id, item)
             if(item.header.frame_id === 'map') {
                 this.updateObject3D(item.transform, this.odomObject3D, this.mapObject3D);
-                
             }else if(item.header.frame_id === 'odom') {
-                // this.updateObject3D(item.transform, this.baseFootprintObject3D, this.odomObject3D);
+                this.updateObject3D(item.transform, this.baseFootprintObject3D, this.odomObject3D);
             }else if(item.header.frame_id === 'base_footprint') {
-                // this.updateObject3D(item.transform, this.baseLinkObject3D, this.baseFootprintObject3D)
+                this.updateObject3D(item.transform, this.baseLinkObject3D, this.baseFootprintObject3D)
             }else if(item.child_frame_id === 'base_link') {
-                // this.updateObject3D(item.transform, this.laserObject3D, this.baseLinkObject3D);
+                this.updateObject3D(item.transform, this.laserObject3D, this.baseLinkObject3D);
             }else if(item.child_frame_id === 'laser') {
                 // this.updateObject3D(item.transform, this.laserObject3D);
             }
         });
         
-        const {robotAngle, x, y, tfAngle} = this.getRototPosition();
+        const {robotAngle, x, y, tfOdomAngle} = this.getRototPosition();
 
         // 更新地图 角度
-        if(this.mapObject3D) {
-            const initialRotation = new THREE.Euler(THREE.MathUtils.degToRad(0), THREE.MathUtils.degToRad(0), THREE.MathUtils.degToRad(-Math.round((Math.atan(robotAngle) * 180))));
+        new TWEEN.Tween(this.globalObject3D.rotation)
+        .to({ x: THREE.MathUtils.degToRad(-90)}, 300)
+        // .to({ y:  -Math.round((Math.atan(tfOdomAngle) * 360) / Math.PI), x: THREE.MathUtils.degToRad(-90)}, 300)
+        .easing(TWEEN.Easing.Quadratic.Out) // 设置动画缓动函数
+        .onUpdate( () => {
+            // const initialRotation = new THREE.Euler(THREE.MathUtils.degToRad(-90), THREE.MathUtils.degToRad(Math.round((Math.atan(-tfOdomAngle) * 360) / Math.PI)), THREE.MathUtils.degToRad(0));
             // this.mapObject3D.rotation.copy(initialRotation);
-            let startRotation = { z: this.mapObject3D.rotation.z };
-            let endRotation = { z: -Math.round((Math.atan(tfAngle) * 360) / Math.PI) };
-
-            new TWEEN.Tween(startRotation)
-            .to({ z: endRotation}, 300)
-            .onUpdate( () => {
-                this.mapObject3D.rotation.z = startRotation.z
-            })
-            .start();
-        };
-
+        })
+        .start();
        
         if(this.modelInstance?.robotModuleGltf) {
             // 更新机器人位置
@@ -238,7 +236,10 @@ export class FoxgloveThreeRenderer implements FoxgloveThreeRendererT{
 
             // 旋转机器人
             // this.modelInstance.robotModuleGltf.scene.rotateY(robotAngle);
-            this.modelInstance.rotateModel( -Math.round((Math.atan(robotAngle) * 360) / Math.PI))
+            const angle = -Math.round((Math.atan(robotAngle) * 360) / Math.PI)
+            this.modelInstance.rotateModel(angle, (object: THREE.Euler, elapsed: number) => {
+                // this.modelInstance?.robotModuleGltf && this.modelInstance.robotModuleGltf.scene.rotateY(angle);
+            })
         };
     };
     
@@ -289,7 +290,7 @@ export class FoxgloveThreeRenderer implements FoxgloveThreeRendererT{
         const { x: tfx, y: tfy, z: tfz} = transformInfo.translation;
         // ElMessage(`${threeOriginX}, : ${threeOriginY}`)
         const { x: px, y: py, z: pz } = parentOvjec3D.position;
-        const position = new THREE.Vector3(-px + tfx, -py - tfy, 0)
+        const position = new THREE.Vector3(-px + tfx, -py - tfy, pz + tfz)
         // var quaternion = new THREE.Quaternion(-r.x, -r.y, -r.z, -r.w);
         // 将点云从ROS坐标系转换到Three.js坐标系
         // position.applyQuaternion(this.baseLinkObject3D.quaternion);
@@ -346,7 +347,7 @@ export class FoxgloveThreeRenderer implements FoxgloveThreeRendererT{
     };
 
     // 获取机器人当前位置
-    private getRototPosition = (): { x: number, y: number, robotAngle: number, tfAngle: number } => {
+    private getRototPosition = (): { x: number, y: number, robotAngle: number, tfMapAngle: number, tfOdomAngle: number } => {
         const map = this.topicTfInfo.get('map');
         const odom = this.topicTfInfo.get("odom");
         const { info } = this.topicMapInfo!;
@@ -383,10 +384,10 @@ export class FoxgloveThreeRenderer implements FoxgloveThreeRendererT{
 
             const [x, y] = [x2 + tx, y2 + ty ];
 
-            this.robotInfo = { x, y, angle: robotAngle, tfAngle: mapAngle_TF };
-            return { x, y, robotAngle, tfAngle };
+            this.robotInfo = { x, y, angle: robotAngle, tfMapAngle: mapAngle_TF, tfOdomAngle: odomAngle_TF };
+            return { x, y, robotAngle, tfMapAngle: mapAngle_TF, tfOdomAngle: odomAngle_TF };
         };
-        return { x: 0, y: 0, robotAngle: 0, tfAngle: 0 };
+        return { x: 0, y: 0, robotAngle: 0, tfMapAngle: 0, tfOdomAngle: 0 };
     };
     
 

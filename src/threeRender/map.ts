@@ -37,10 +37,11 @@ export class ThreeRenderMap implements ThreeMapT{
             
                     // 创建材质，并将纹理贴图应用到材质的 map 属性上
                     this.mapMaterial = new THREE.MeshBasicMaterial({ map: texture, side: THREE.DoubleSide });
-            
+
                     // 创建平面几何体，并应用材质
                     this.mapGeometry = new THREE.PlaneGeometry(mw, mh, 10, 10);
                     this.mesh = new THREE.Mesh(this.mapGeometry, this.mapMaterial);
+                    // this.mesh.rotateX(180)
                     this.mesh.castShadow = true;
                     this.mesh.receiveShadow = true;
 

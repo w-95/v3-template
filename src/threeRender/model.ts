@@ -6,7 +6,7 @@ import * as TWEEN from '@tweenjs/tween.js';
 
 export type ThreeWebGlT = {
     robotModuleGltf: GLTF | undefined;
-    rotateModel: ( angle: number ) => void;
+    rotateModel: ( angle: number, onUpdate: (object: THREE.Euler, elapsed: number) => void) => void;
 };
 
 export class ThreeRenderModel implements ThreeWebGlT{
@@ -43,17 +43,14 @@ export class ThreeRenderModel implements ThreeWebGlT{
         });
     };
 
-    public rotateModel = ( angle: number ) => {
+    public rotateModel = ( angle: number, onUpdate: (object: THREE.Euler, elapsed: number) => void) => {
         if(this.robotModuleGltf) {
             
             new TWEEN.Tween(this.robotModuleGltf.scene.rotation)
             .to({ y: angle }, 500) // 设置动画目标值和过渡时间（1秒）
             .easing(TWEEN.Easing.Quadratic.Out) // 设置动画缓动函数
             .start() // 开始动画
-            .onUpdate(function () {
-                // 在动画更新时触发
-                // renderer.render(scene, camera);
-            });
+            .onUpdate(onUpdate);
         };
     }
 }
