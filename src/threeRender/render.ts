@@ -269,7 +269,7 @@ export class FoxgloveThreeRenderer implements FoxgloveThreeRendererT{
         return undefined
     }
 
-    // 根据坐标系关系更新坐标和角度
+    // 更新坐标
     private updateObject3D = (transformInfo: transforms, Object3D: THREE.Object3D, tfName:string) => {
         if (!this.topicMapInfo ) return;
 
@@ -340,55 +340,11 @@ export class FoxgloveThreeRenderer implements FoxgloveThreeRendererT{
             // const [x, y] = [x2 + parentTX, y2 + parentPY ];
             const [x, y] = [x2 + parentTX, -y2 - parentPY ];
             pointInfo = { x, y, angle, parentAngle: parentAngle_TF, childAngle: childAngle_TF };
-            this.robotInfo[parent.header.frame_id] = JSON.parse(JSON.stringify({ ...this.robotInfo[parent.header.frame_id], ...pointInfo }));
+            this.robotInfo[parent.header.frame_id] = { ...this.robotInfo[parent.header.frame_id], ...pointInfo };
         };
 
         return pointInfo;
     };
-
-    /**
-     * 获取机器人当前位置
-     * @returns { x: 机器人x坐标， y： 机器人y坐标， angle: 机器人旋转角度， parentAngle map的旋转角度， childAngle odom的旋转角度}
-     */
-    // private getRototPosition = (): { x: number, y: number, angle: number, parentAngle: number, childAngle: number } => {
-    //     const map = this.topicTfInfo.get('map');
-    //     const odom = this.topicTfInfo.get("odom");
-
-    //     if(odom && map) {
-    //         // 获取四元数
-    //         const { x: qx, y: qy, z: qz, w: qw } = odom.transform.rotation; // odom -> basefootprint
-    //         const { x: mx, y: my, z: mz, w: mw } = map.transform.rotation; // map -> odom
-
-    //         // 获取角度
-    //         const odomAngle = 2 * Math.atan2(Math.sqrt(qx * qx + qy * qy + qz * qz), qw) * (180 / Math.PI);
-    //         const mapAngle = 2 * Math.atan2(Math.sqrt(mx* mx + my * my + mz * mz), mw) * (180 / Math.PI);
-
-    //         // map => odom 的角度
-    //         const mapAngle_TF = Math.atan2(2 * (mw * mz + mx * my), 1 - 2 * (my * my + mz * mz)) * (180 / Math.PI);
-    //         const odomAngle_TF = Math.atan2(2 * (qw * qz + qx * qy), 1 - 2 * (qy * qy + qz * qz)) * (180 / Math.PI);
-
-    //         // 计算机器人的角度
-    //         const robotAngle = mapAngle - odomAngle;
-
-    //         // 计算sinθ
-    //         const sin = Math.sin( mapAngle_TF * (Math.PI / 180));
-
-    //         // 计算cosθ
-    //         const cos = Math.cos( mapAngle_TF * (Math.PI / 180));
-
-    //         const { x: x1, y: y1 } = odom.transform.translation;
-    //         const { x: tx, y: ty } = map.transform.translation;
-
-    //         const [ x2, y2 ] = [ x1 * (cos) - y1 * (sin), x1 * (sin) + y1 * (cos)];
-
-    //         const [x, y] = [x2 + tx, y2 + ty ];
-
-    //         const info = { x, y, angle: robotAngle, parentAngle: mapAngle_TF, childAngle: odomAngle_TF };
-    //         this.robotInfo.odomToMap = info;
-    //         return info;
-    //     };
-    //     return { x: 0, y: 0, angle: 0, parentAngle: 0, childAngle: 0 };
-    // };
     
 
     // 切换相机
