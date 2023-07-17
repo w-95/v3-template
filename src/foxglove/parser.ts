@@ -1,4 +1,4 @@
-import protobufjs from 'protobufjs';
+import * as protobufjs from 'protobufjs';
 
 import { MessageDefinitionField, MessageDefinition } from '@foxglove/message-definition';
 

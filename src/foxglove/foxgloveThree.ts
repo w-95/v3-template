@@ -2,7 +2,7 @@
 import * as THREE from "three";
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 
-import { TopicMapT, OffsetWHT, TopicScanT, TopicTfT, transforms } from "@/interface/foxgloveThree";
+import { TopicMapT, OffsetWHT, TopicScanT, TopicTfT, transforms, wayPoint } from "@/interface/foxgloveThree";
 
 import {renderTopicMap} from "@/foxglove/renderTopicMap";
 
@@ -26,6 +26,7 @@ export type FoxgloveThreeRendererT = {
     topicMapChage: (message: TopicMapT) => void;
     topicScanChange: (message: TopicScanT) => void;
     topicTfChange: (message: TopicTfT) => void;
+    topicWayPointChange: (message: wayPoint) => void;
 };
 
 const positions: number | Iterable<number> | ArrayLike<number> | ArrayBuffer = []; // 顶点坐标数组

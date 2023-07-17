@@ -158,3 +158,15 @@ export interface transforms {
 export interface TopicTfT {
   transforms: transforms[]
 }
+
+export interface point {
+  point_id: number,
+  point_name: string,
+  point_type: number,
+  poses: Pose
+}
+
+export interface wayPoint {
+  header: Header,
+  points: point[]
+}

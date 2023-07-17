@@ -1,4 +1,4 @@
-import { ref, onMounted, Ref, reactive } from 'vue';
+import { ref, Ref } from 'vue';
 import { useWebSocket } from '@vueuse/core';
 import { ElMessage } from 'element-plus/lib/components/index.js';
 
@@ -8,9 +8,7 @@ import { parseChannel } from '@/foxglove/parser';
 
 import * as base64 from '@protobufjs/base64';
 
-import protobufjs from 'protobufjs';
-import { getMapBase64 } from "@/utils/index";
-import { TopicMapT, TopicScanT, TopicTfT } from "@/interface/foxgloveThree";
+import { TopicMapT, TopicScanT, TopicTfT, wayPoint } from "@/interface/foxgloveThree";
 
 import { MessageDefinitionField, MessageDefinition } from '@foxglove/message-definition';
 
@@ -35,6 +33,8 @@ type OptionT = {
   mapDataChange: (data: TopicMapT) => void;
   topicTfChange: (data: TopicTfT) => void;
   scanDataChange: (data: TopicScanT) => void;
+  topicWayPointChange: (data: wayPoint) => void;
+  
 }
 export const useFoxgloveSocket = (linkUrl: string, rosNumber: string, options: OptionT) => {
   const msgInstance: Ref<any> = ref(null);
@@ -149,7 +149,6 @@ export const useFoxgloveSocket = (linkUrl: string, rosNumber: string, options: O
 
       client.value.subscribe(channel.id);
     });
-    console.log('this is a channelsByTopic.value =====', channelsByTopic.value);
   });
 
   client.value.on('unadvertise', (removedChannels: any) => {
@@ -165,6 +164,7 @@ export const useFoxgloveSocket = (linkUrl: string, rosNumber: string, options: O
 
     if (topicChanInfo) {
       const message = topicChanInfo.parsedChannel.deserialize(data);
+      console.log("message::", message, '---', subscriptionId)
       
       // 地图数据
       if( subscriptionId === 1 && message) {
@@ -179,6 +179,12 @@ export const useFoxgloveSocket = (linkUrl: string, rosNumber: string, options: O
       };
 
       // 机器人当前位置
+      if(subscriptionId === 3) {
+        options.topicTfChange(message);
+        return;
+      };
+
+      // 点位信息
       if(subscriptionId === 3) {
         options.topicTfChange(message);
         return;

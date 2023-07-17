@@ -1,7 +1,7 @@
 
 import * as THREE from "three";
 
-import { TopicMapT, OffsetWHT, TopicScanT, TopicTfT, transforms, transform } from "@/interface/foxgloveThree";
+import { TopicMapT, OffsetWHT, TopicScanT, TopicTfT, transforms, transform, wayPoint } from "@/interface/foxgloveThree";
 
 import { ThreeRenderMap } from "@/threeRender/map";
 import { ThreeRenderGrid } from "@/threeRender/grid";
@@ -25,6 +25,7 @@ export type FoxgloveThreeRendererT = {
     topicMapChage: (message: TopicMapT) => void;
     topicScanChange: (message: TopicScanT) => void;
     topicTfChange: (message: TopicTfT) => void;
+    topicWayPointChange: (message: wayPoint) => void;
 };
 
 type transformAxis = { x: number, y: number, angle: number, parentAngle: number, childAngle: number }
@@ -40,12 +41,16 @@ export class FoxgloveThreeRenderer implements FoxgloveThreeRendererT{
     // 渲染的类型：2D || 3D
     public renderType: '2D' | '3D';
 
-    // 当前/Map的信息
+    // 当前/Map的信息 地图信息
     public topicMapInfo:TopicMapT | null;
-    // 当前/tf的信息
+    // 当前/tf的信息 坐标关系信息
     public topicTfInfo: Map<string, transforms>;
-    // 当前 /scan的信息
-    public topicScanInfo: TopicScanT | null
+    // 当前 /scan的信息 激光雷达点云信息
+    public topicScanInfo: TopicScanT | null;
+    // 当前 /waypoint的信息 点位信息
+    private wayPoints: wayPoint | null;
+    // 存储当前点位的集合
+    // private wayPointsArray: 
 
     // 当前渲染的canvas元素
     public readonly threeRenderDom: any;
@@ -88,6 +93,7 @@ export class FoxgloveThreeRenderer implements FoxgloveThreeRendererT{
         this.topicMapInfo = null;
         this.topicTfInfo = new Map();
         this.topicScanInfo = null;
+        this.wayPoints = null;
 
         this.threeRenderDom = threeRenderDom;
 
@@ -148,6 +154,8 @@ export class FoxgloveThreeRenderer implements FoxgloveThreeRendererT{
         
         // this.scene.add(new THREE.AxesHelper(5));
         this.scene.add(this.globalObject3D);
+
+        this.lightningPoint()
     };
 
     /**
@@ -187,7 +195,6 @@ export class FoxgloveThreeRenderer implements FoxgloveThreeRendererT{
      */
     public topicTfChange = (message: TopicTfT) => {
         const { transforms } = message;
-        // const {angle: robotAngle, x, y, childAngle: odomAngle} = this.getTfParentToChild_xy("map", "odom");
 
         transforms.forEach((item) => {
             this.robotInfo[item.header.frame_id] = { ...item, ...this.getTfParentToChild_xy(item.header.frame_id, item.child_frame_id) };
@@ -221,7 +228,7 @@ export class FoxgloveThreeRenderer implements FoxgloveThreeRendererT{
         if(this.modelInstance?.robotModuleGltf) {
             // 更新机器人位置
             const { x: map3Dx, y: map3Dy, z: map3Dz } = this.mapObject3D.position;
-            this.modelInstance.robotModuleGltf.scene.position.set(x, y, map3Dz);
+            this.modelInstance.robotModuleGltf.scene.position.set(x, y, map3Dz + 0.1);
 
             // 更新连接机器人线的点位
             this.updateLineToMap_oDom();
@@ -250,6 +257,117 @@ export class FoxgloveThreeRenderer implements FoxgloveThreeRendererT{
         });
     };
 
+    /**
+     * foxglove client /wayPoint event change id: 4
+     * @TODO 点位信息
+     * @param message TopicwayPoint client收到的信息 
+     */
+    public topicWayPointChange = (message: wayPoint) => {
+        this.wayPoints = message;
+
+        message.points.forEach((point, index) => {
+
+        })
+        
+    };
+
+    // 添加充电桩点位
+    private lightningPoint = () => {
+        const shapeLightning = new THREE.Shape();
+        shapeLightning.moveTo(0.07, 0.95);
+        shapeLightning.lineTo(-0.15, 0.67);
+        shapeLightning.lineTo(-0.03, 0.688);
+        shapeLightning.lineTo(-0.07, 0.45);
+        shapeLightning.lineTo(0.15, 0.712);
+        shapeLightning.lineTo(0.03, 0.71008);
+
+        shapeLightning.autoClose = true; // Auto close the path to ensure it's a complete shape
+        // 创建具有逆时针方向的路径，并将 shapeLightning 的顶点复制到其中
+        const holePath = new THREE.Path();
+        const vertices = shapeLightning.getPoints();
+        holePath.setFromPoints(vertices);
+
+        const shape = new THREE.Shape();
+        shape.arc(0, 0.7, 0.4, 0, 2 * Math.PI, false);
+
+        shape.holes.push(holePath);
+        const extrudeSettings = {
+            depth: 0.0000000001,
+            bevelEnabled: true,
+            // bevelThickness: 0.0001,
+            // bevelSize: 0.0001,
+            bevelOffset: 0,
+            bevelSegments: 5
+        };
+        const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+        const material = new THREE.MeshPhongMaterial({
+            color: 0x00ff00,
+            side: THREE.DoubleSide
+        });
+        const mesh = new THREE.Mesh(geometry, material);
+
+        const shape1 = new THREE.Shape();
+        shape1.moveTo(-0.2, 0.3);
+        shape1.lineTo(0, 0.1);
+        shape1.lineTo(0.2, 0.3);
+
+        
+        const geometry2 = new THREE.ExtrudeGeometry(shape1, extrudeSettings);
+        const mesh2 = new THREE.Mesh(geometry2, material);
+
+        const group = new THREE.Group();
+        group.add(mesh, mesh2);
+        group.scale.set(.5, .5, .5);
+        const initialRotation = new THREE.Euler(THREE.MathUtils.degToRad(90), THREE.MathUtils.degToRad(0), THREE.MathUtils.degToRad(0));
+
+        group.rotation.copy(initialRotation);
+
+        this.globalObject3D.add(group);
+    };
+
+    // 添加普通点位
+    private addPoint_map = (x: number = 0, y: number = 0, color: number = 0x00ff00) => {
+        const shape = new THREE.Shape();
+        shape.arc(0, 0.7, 0.4, 0, 2 * Math.PI, false);
+
+        const path1 = new THREE.Path();
+        path1.arc(0, 0.7, 0.3, 0, 2 * Math.PI, false);
+        shape.holes.push(path1);
+
+        const extrudeSettings = {
+            depth: 0.0005
+        };
+
+        const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+        const material = new THREE.MeshPhongMaterial({
+            color: 0x00ff00,
+            side: THREE.DoubleSide
+        });
+        const mesh = new THREE.Mesh(geometry, material);
+
+        const shape1 = new THREE.Shape();
+        shape1.moveTo(-0.2, 0.3);
+        shape1.lineTo(0, 0.1);
+        shape1.lineTo(0.2, 0.3);
+
+        const geometry2 = new THREE.ExtrudeGeometry(shape1, extrudeSettings);
+        const mesh2 = new THREE.Mesh(geometry2, material);
+
+        const group = new THREE.Group();
+        group.add(mesh, mesh2);
+        group.scale.set(.5, .5, .5);
+        const initialRotation = new THREE.Euler(THREE.MathUtils.degToRad(90), THREE.MathUtils.degToRad(0), THREE.MathUtils.degToRad(0));
+
+        group.rotation.copy(initialRotation);
+
+        this.globalObject3D.add(group);
+    };
+
+    /**
+     * 获取某个tf坐标的父坐标轴
+     * @param tfName 
+     * @returns 
+     */
     private get_tf_parent = ( tfName: string ) => {
         if( tfName === "odom" ) {
             return this.topicTfInfo.get("map");

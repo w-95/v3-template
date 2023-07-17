@@ -27,7 +27,7 @@ export class ThreeRenderModel implements ThreeWebGlT{
             const loader = new GLTFLoader();
             loader.load( modelSrc, ( gltf: GLTF ) => {
                 this.robotModuleGltf = gltf;
-                this.robotModuleGltf.scene.rotateX(90);
+                this.robotModuleGltf.scene.rotateX(THREE.MathUtils.degToRad(90));
                 this.robotModuleGltf.scene.scale.set(0.5, 0.5, 0.5);
                 resolve(gltf);
             }, () => {

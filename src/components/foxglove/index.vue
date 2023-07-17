@@ -44,7 +44,8 @@ const initPlayer = () => {
         const { client } = useFoxgloveSocket(linkUrl, rosNumber, {
             mapDataChange: renderer.value.topicMapChage,
             scanDataChange: renderer.value.topicScanChange,
-            topicTfChange: renderer.value.topicTfChange
+            topicTfChange: renderer.value.topicTfChange,
+            topicWayPointChange: renderer.value.topicWayPointChange,
         });
         foxgloveClient.value = client;
     }
