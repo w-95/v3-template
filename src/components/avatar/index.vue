@@ -61,7 +61,6 @@ export default ({
                 bgColor.value = stringToColor(name as string);
                 fontColor.value = getContrastingColor(bgColor.value);
                 userName.value = (name as string).charAt(0);
-                console.log(userName)
             };
         });
 

@@ -17,7 +17,7 @@
             <!-- 头像 -->
             <el-popover placement="bottom" trigger="click" width="230">
                 <template #reference>
-                    <Avatar :name="userInfo ? userInfo.realName : ''" :phone="userInfo ? userInfo.mobile : '18888888888'" />
+                    <Avatar :name="userInfo ? userInfo.realName.replace('王', '') : ''" :phone="userInfo ? userInfo.mobile : '18888888888'" />
                 </template>
                 <div class="user-action-view">
                     <Account></Account>

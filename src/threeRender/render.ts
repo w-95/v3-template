@@ -27,7 +27,8 @@ export type FoxgloveThreeRendererT = {
     topicTfChange: (message: TopicTfT) => void;
 };
 
-export type robotInfoT = { x: number, y: number, angle: number, tfMapAngle: number, tfOdomAngle: number, [x:string]: any };
+type transformAxis = { x: number, y: number, angle: number, parentAngle: number, childAngle: number }
+export type robotInfoT = { [x:string]: transformAxis & transforms };
 
 // 相机的视角（fov）
 export const cameraFov = 45;
@@ -70,7 +71,7 @@ export class FoxgloveThreeRenderer implements FoxgloveThreeRendererT{
 
     // 坐标线 机器人 - odom - map
     private positionLine: any;
-    private robotInfo: robotInfoT;
+    private robotInfo:  robotInfoT;
 
     // 坐标系
     public globalObject3D: THREE.Object3D;
@@ -78,7 +79,6 @@ export class FoxgloveThreeRenderer implements FoxgloveThreeRendererT{
     public odomObject3D: THREE.Object3D;
     public baseFootprintObject3D: THREE.Object3D;
     public baseLinkObject3D: THREE.Object3D;
-    public laserObject3D: THREE.Object3D;
 
     constructor({ threeRenderDom, width, height }: { threeRenderDom: any, width: number, height: number}) {
         this.offsetWH = { width, height };
@@ -98,27 +98,23 @@ export class FoxgloveThreeRenderer implements FoxgloveThreeRendererT{
         this.odomObject3D = new THREE.Object3D();
         this.baseFootprintObject3D = new THREE.Object3D();
         this.baseLinkObject3D = new THREE.Object3D();
-        this.laserObject3D = new THREE.Object3D();
 
-        const mapAxes = new THREE.AxesHelper(5);
-        const odomAxes = new THREE.AxesHelper(5);
-        const baseFootprintAxes = new THREE.AxesHelper(15);
-        const baseLinkAxes = new THREE.AxesHelper(5);
-        const laserAxes = new THREE.AxesHelper(5);
+        const mapAxes = new THREE.AxesHelper(2);
+        const odomAxes = new THREE.AxesHelper(2);
+        const baseFootprintAxes = new THREE.AxesHelper(2);
+        const baseLinkAxes = new THREE.AxesHelper(2);
 
-        this.globalObject3D.add(new THREE.AxesHelper(5))
+        this.globalObject3D.add(new THREE.AxesHelper(10))
         this.mapObject3D.add(mapAxes);
         this.odomObject3D.add(odomAxes);
         this.baseFootprintObject3D.add(baseFootprintAxes);
         this.baseLinkObject3D.add(baseLinkAxes);
-        this.laserObject3D.add(laserAxes);
 
         
         this.globalObject3D.add(this.mapObject3D);
-        this.mapObject3D.add(this.odomObject3D);
+        this.globalObject3D.add(this.odomObject3D);
         this.odomObject3D.add(this.baseFootprintObject3D);
         this.baseFootprintObject3D.add(this.baseLinkObject3D);
-        this.baseLinkObject3D.add(this.laserObject3D);
 
         this.cameraInstance = new ThreeRenderCamera(width, height, this.scene);
 
@@ -131,7 +127,7 @@ export class FoxgloveThreeRenderer implements FoxgloveThreeRendererT{
         this.webGlInstance = new ThreeRenderWebgl(this.threeRenderDom, width, height);
         this.controlsInstance = new ThreeRenderControls(camera, this.webGlInstance.webGLRender);
         this.lightInstance = new ThreeRenderLight(this.scene);
-        this.modelInstance = new ThreeRenderModel(this.mapObject3D);
+        this.modelInstance = new ThreeRenderModel(this.globalObject3D);
 
         this.webGlInstance.render(this.scene, camera)
         
@@ -148,13 +144,7 @@ export class FoxgloveThreeRenderer implements FoxgloveThreeRendererT{
         
         this.positionLine = null;
 
-        this.robotInfo = {
-            x: 0,
-            y: 0,
-            angle: 0,
-            tfMapAngle: 0,
-            tfOdomAngle: 0
-        };
+        this.robotInfo = {};
         
         // this.scene.add(new THREE.AxesHelper(5));
         this.scene.add(this.globalObject3D);
@@ -187,7 +177,7 @@ export class FoxgloveThreeRenderer implements FoxgloveThreeRendererT{
         this.createLineToMap_oDom();
 
         // 设置辅助网格
-        // this.mapObject3D.add(this.gridInstance.initGrid(message))
+        this.mapObject3D.add(this.gridInstance.initGrid(message))
     };
 
     /**
@@ -197,27 +187,29 @@ export class FoxgloveThreeRenderer implements FoxgloveThreeRendererT{
      */
     public topicTfChange = (message: TopicTfT) => {
         const { transforms } = message;
-        
+        // const {angle: robotAngle, x, y, childAngle: odomAngle} = this.getTfParentToChild_xy("map", "odom");
+
         transforms.forEach((item) => {
-            this.topicTfInfo.set(item.header.frame_id, item)
-            if(item.header.frame_id === 'map') {
-                this.updateObject3D(item.transform, this.odomObject3D, this.mapObject3D);
-            }else if(item.header.frame_id === 'odom') {
-                this.updateObject3D(item.transform, this.baseFootprintObject3D, this.odomObject3D);
-            }else if(item.header.frame_id === 'base_footprint') {
-                this.updateObject3D(item.transform, this.baseLinkObject3D, this.baseFootprintObject3D)
-            }else if(item.child_frame_id === 'base_link') {
-                this.updateObject3D(item.transform, this.laserObject3D, this.baseLinkObject3D);
-            }else if(item.child_frame_id === 'laser') {
-                // this.updateObject3D(item.transform, this.laserObject3D);
+            this.robotInfo[item.header.frame_id] = { ...item, ...this.getTfParentToChild_xy(item.header.frame_id, item.child_frame_id) };
+            
+            const { header, child_frame_id, transform } = item;
+
+            this.topicTfInfo.set(header.frame_id, item);
+
+            if(child_frame_id === 'base_footprint') {
+                this.updateObject3D(item, this.odomObject3D, item.header.frame_id)
+            }else if(child_frame_id === 'base_link') {
+                this.updateObject3D(item, this.baseFootprintObject3D, item.header.frame_id);
+            }else if(child_frame_id === 'laser') {
+                this.updateObject3D(item, this.baseLinkObject3D, item.header.frame_id);
             }
         });
         
-        const {robotAngle, x, y, tfOdomAngle} = this.getRototPosition();
-
+        
+        const {angle: robotAngle, x, y, childAngle: odomAngle} = this.robotInfo.map;
         // 更新地图 角度
         new TWEEN.Tween(this.globalObject3D.rotation)
-        .to({ x: THREE.MathUtils.degToRad(-90)}, 300)
+        .to({ x: THREE.MathUtils.degToRad(-90), z: THREE.MathUtils.degToRad(-odomAngle)}, 300)
         // .to({ y:  -Math.round((Math.atan(tfOdomAngle) * 360) / Math.PI), x: THREE.MathUtils.degToRad(-90)}, 300)
         .easing(TWEEN.Easing.Quadratic.Out) // 设置动画缓动函数
         .onUpdate( () => {
@@ -229,7 +221,7 @@ export class FoxgloveThreeRenderer implements FoxgloveThreeRendererT{
         if(this.modelInstance?.robotModuleGltf) {
             // 更新机器人位置
             const { x: map3Dx, y: map3Dy, z: map3Dz } = this.mapObject3D.position;
-            this.modelInstance.robotModuleGltf.scene.position.set(-map3Dx + x, -map3Dy - y, map3Dz);
+            this.modelInstance.robotModuleGltf.scene.position.set(x, y, map3Dz);
 
             // 更新连接机器人线的点位
             this.updateLineToMap_oDom();
@@ -258,53 +250,158 @@ export class FoxgloveThreeRenderer implements FoxgloveThreeRendererT{
         });
     };
 
-    // 为某个object3D 添加一个label
-    private addLabel_object3D = (object: THREE.Object3D, labelName:string, color: string='#010112', position: any) => {
-        const labelCanvas = document.createElement('canvas');
-        labelCanvas.width = 50;
-        labelCanvas.height = 50;
-        labelCanvas.style.backgroundColor = "#FFF";
-        const labelContext = labelCanvas.getContext('2d')!;
-        labelContext.font = 'Bold 20px ';
-        labelContext.fillStyle = color;
-        labelContext.fillText(labelName, 0, 20);
-        
-        // 将Canvas转换为纹理
-        var labelTexture = new THREE.Texture(labelCanvas);
-        labelTexture.needsUpdate = true;
-        
-        // 创建Sprite以容纳标签
-        var labelMaterial = new THREE.SpriteMaterial({ map: labelTexture });
-        var labelSprite = new THREE.Sprite(labelMaterial);
-        labelSprite.position.copy(position);
-        labelSprite.scale.set(3, 3, 3); // 调整Sprite的大小
-        
-        // 将Sprite附加到Object3D上
-        object.add(labelSprite);
-    };
+    private get_tf_parent = ( tfName: string ) => {
+        if( tfName === "odom" ) {
+            return this.topicTfInfo.get("map");
+        };
+
+        if( tfName === "base_footprint" ){
+            return this.topicTfInfo.get("odom");
+        };
+
+        if( tfName === "base_link" ){
+            return this.topicTfInfo.get("base_footprint");
+        };
+
+        if( tfName === "laser" ){
+            return this.topicTfInfo.get("base_link");
+        };
+        return undefined
+    }
 
     // 根据坐标系关系更新坐标和角度
-    private updateObject3D = (transformInfo: transform, Object3D: THREE.Object3D, parentOvjec3D: THREE.Object3D) => {
-        if(!this.topicMapInfo) return;
+    private updateObject3D = (transformInfo: transforms, Object3D: THREE.Object3D, tfName:string) => {
+        if (!this.topicMapInfo ) return;
 
-        const { x: tfx, y: tfy, z: tfz} = transformInfo.translation;
-        // ElMessage(`${threeOriginX}, : ${threeOriginY}`)
-        const { x: px, y: py, z: pz } = parentOvjec3D.position;
-        const position = new THREE.Vector3(-px + tfx, -py - tfy, pz + tfz)
-        // var quaternion = new THREE.Quaternion(-r.x, -r.y, -r.z, -r.w);
-        // 将点云从ROS坐标系转换到Three.js坐标系
-        // position.applyQuaternion(this.baseLinkObject3D.quaternion);
-        // position.add(this.baseLinkObject3D.position);
-        // quaternion.multiply(this.baseLinkObject3D.quaternion);
-        
-        Object3D.position.copy(position);
-        // Object3D.quaternion.copy(quaternion);
+        const tfParent = this.get_tf_parent( tfName );
+        const activePoint = this.robotInfo[tfName];
+
+        if(tfParent && activePoint) {
+            
+            const { x: px, y: py, z: pz } = tfParent.transform.translation;
+            const { map }= this.robotInfo;
+            
+            // 原来是以地图中心点 将odomobject 加到globalobject3D后以一origin为准
+            if(tfName === "odom" && map) {
+                const position = new THREE.Vector3(activePoint.x + map.x,  activePoint.y + map.y, pz);
+                Object3D.position.copy(position);
+                return
+            };
+
+            if(tfName === "base_footprint" || tfName === "base_link") {
+                const position = new THREE.Vector3(activePoint.x,  activePoint.y);
+                Object3D.position.copy(position);
+                return;
+            };
+        };
+    };
+    
+
+    /**
+     * 计算两个父子关系的坐标系的xy  相对于parent 漂了多少 !!这俩坐标系必须是父子级关系
+     * @param parentName 父坐标轴的frame_id
+     * @param childName 子坐标轴的frame_id
+     * @returns 
+     * x: x坐标
+     * y: y坐标
+     * angle: 真正的旋转角度
+     * parentAngle: 父TF数据的旋转
+     * childAngle: 子TF数据的旋转
+     */
+    private getTfParentToChild_xy = (parentName: string, childName: string): { x: number, y: number, angle: number, parentAngle: number, childAngle: number } => {
+        const parent = this.topicTfInfo.get(parentName);
+        const child = this.topicTfInfo.get(childName);
+        let pointInfo = { x: 0, y: 0, angle: 0, parentAngle: 0, childAngle: 0 };
+
+        if(parent && child) {
+            const { x: parentX, y: parentY, z: parentZ, w: parentW } = parent.transform.rotation;
+            const { x: chardX, y: chardY, z: chardZ, w: chardW } = child.transform.rotation; // odom -> basefootprint
+
+            // 获取角度
+            const parentAngle = 2 * Math.atan2(Math.sqrt(parentX* parentX + parentY * parentY + parentZ * parentZ), parentW) * (180 / Math.PI);
+            const chidlAngle = 2 * Math.atan2(Math.sqrt(chardX * chardX + chardY * chardY + chardZ * chardZ), chardW) * (180 / Math.PI);
+
+            const parentAngle_TF = Math.atan2(2 * (parentW * parentZ + parentX * parentY), 1 - 2 * (parentY * parentY + parentZ * parentZ)) * (180 / Math.PI);
+            const childAngle_TF = Math.atan2(2 * (chardW * chardZ + chardX * chardY), 1 - 2 * (chardY * chardY + chardZ * chardZ)) * (180 / Math.PI);
+
+            const angle = parentAngle - chidlAngle;
+
+            // 计算sinθ
+            const sin = Math.sin( parentAngle * (Math.PI / 180));
+
+            // 计算cosθ
+            const cos = Math.cos( parentAngle * (Math.PI / 180));
+
+            const { x: childTX, y: chldTY } = child.transform.translation;
+            const { x: parentTX, y: parentPY } = parent.transform.translation;
+
+            const [ x2, y2 ] = [ childTX * (cos) - chldTY * (sin), childTX * (sin) + chldTY * (cos)];
+
+            // const [x, y] = [x2 + parentTX, y2 + parentPY ];
+            const [x, y] = [x2 + parentTX, -y2 - parentPY ];
+            pointInfo = { x, y, angle, parentAngle: parentAngle_TF, childAngle: childAngle_TF };
+            this.robotInfo[parent.header.frame_id] = JSON.parse(JSON.stringify({ ...this.robotInfo[parent.header.frame_id], ...pointInfo }));
+        };
+
+        return pointInfo;
     };
 
+    /**
+     * 获取机器人当前位置
+     * @returns { x: 机器人x坐标， y： 机器人y坐标， angle: 机器人旋转角度， parentAngle map的旋转角度， childAngle odom的旋转角度}
+     */
+    // private getRototPosition = (): { x: number, y: number, angle: number, parentAngle: number, childAngle: number } => {
+    //     const map = this.topicTfInfo.get('map');
+    //     const odom = this.topicTfInfo.get("odom");
+
+    //     if(odom && map) {
+    //         // 获取四元数
+    //         const { x: qx, y: qy, z: qz, w: qw } = odom.transform.rotation; // odom -> basefootprint
+    //         const { x: mx, y: my, z: mz, w: mw } = map.transform.rotation; // map -> odom
+
+    //         // 获取角度
+    //         const odomAngle = 2 * Math.atan2(Math.sqrt(qx * qx + qy * qy + qz * qz), qw) * (180 / Math.PI);
+    //         const mapAngle = 2 * Math.atan2(Math.sqrt(mx* mx + my * my + mz * mz), mw) * (180 / Math.PI);
+
+    //         // map => odom 的角度
+    //         const mapAngle_TF = Math.atan2(2 * (mw * mz + mx * my), 1 - 2 * (my * my + mz * mz)) * (180 / Math.PI);
+    //         const odomAngle_TF = Math.atan2(2 * (qw * qz + qx * qy), 1 - 2 * (qy * qy + qz * qz)) * (180 / Math.PI);
+
+    //         // 计算机器人的角度
+    //         const robotAngle = mapAngle - odomAngle;
+
+    //         // 计算sinθ
+    //         const sin = Math.sin( mapAngle_TF * (Math.PI / 180));
+
+    //         // 计算cosθ
+    //         const cos = Math.cos( mapAngle_TF * (Math.PI / 180));
+
+    //         const { x: x1, y: y1 } = odom.transform.translation;
+    //         const { x: tx, y: ty } = map.transform.translation;
+
+    //         const [ x2, y2 ] = [ x1 * (cos) - y1 * (sin), x1 * (sin) + y1 * (cos)];
+
+    //         const [x, y] = [x2 + tx, y2 + ty ];
+
+    //         const info = { x, y, angle: robotAngle, parentAngle: mapAngle_TF, childAngle: odomAngle_TF };
+    //         this.robotInfo.odomToMap = info;
+    //         return info;
+    //     };
+    //     return { x: 0, y: 0, angle: 0, parentAngle: 0, childAngle: 0 };
+    // };
+    
+
+    // 切换相机
+    private checkRenderType = (mode: '2D' | '3D') => {
+        this.renderType = mode;
+        this.cameraInstance.checkCamera(mode, this.controlsInstance.controls, this.scene, this.offsetWH.width, this.offsetWH.height)
+    };
+
+    // 更新线
     private updateLineToMap_oDom = () => {
         const { robotModuleGltf } = this.modelInstance;
 
-        if(robotModuleGltf) {
+        if(robotModuleGltf && this.positionLine) {
             const positions = [
                 new THREE.Vector3(robotModuleGltf.scene.position.x, robotModuleGltf.scene.position.y, robotModuleGltf.scene.position.z),
                 new THREE.Vector3(this.odomObject3D.position.x, this.odomObject3D.position.y, this.odomObject3D.position.z),
@@ -342,59 +439,33 @@ export class FoxgloveThreeRenderer implements FoxgloveThreeRendererT{
             // 创建线段网格
             const mesh = new THREE.Mesh(this.positionLine, material);
             // 将线对象添加到场景中
-            this.mapObject3D.add(mesh);
+            this.globalObject3D.add(mesh);
         }
     };
 
-    // 获取机器人当前位置
-    private getRototPosition = (): { x: number, y: number, robotAngle: number, tfMapAngle: number, tfOdomAngle: number } => {
-        const map = this.topicTfInfo.get('map');
-        const odom = this.topicTfInfo.get("odom");
-        const { info } = this.topicMapInfo!;
-
-        if(odom && map && info) {
-            // 获取四元数
-            const { x: qx, y: qy, z: qz, w: qw } = odom.transform.rotation; // odom -> basefootprint
-            const { x: mx, y: my, z: mz, w: mw } = map.transform.rotation; // map -> odom
-
-            // 获取角度
-            const odomAngle = 2 * Math.atan2(Math.sqrt(qx * qx + qy * qy + qz * qz), qw) * (180 / Math.PI);
-            const mapAngle = 2 * Math.atan2(Math.sqrt(mx* mx + my * my + mz * mz), mw) * (180 / Math.PI);
-
-            // map => odom 的角度
-            const mapAngle_TF = Math.atan2(2 * (mw * mz + mx * my), 1 - 2 * (my * my + mz * mz)) * (180 / Math.PI);
-            const odomAngle_TF = Math.atan2(2 * (qw * qz + qx * qy), 1 - 2 * (qy * qy + qz * qz)) * (180 / Math.PI);
-
-            // 计算机器人的角度
-            const robotAngle = mapAngle - odomAngle;
-
-            // TF 关系角度
-            const tfAngle = odomAngle_TF + mapAngle_TF;
-
-            // 计算sinθ
-            const sin = Math.sin( mapAngle_TF * (Math.PI / 180));
-
-            // 计算cosθ
-            const cos = Math.cos( mapAngle_TF * (Math.PI / 180));
-
-            const { x: x1, y: y1 } = odom.transform.translation;
-            const { x: tx, y: ty } = map.transform.translation;
-
-            const [ x2, y2 ] = [ x1 * (cos) - y1 * (sin), x1 * (sin) + y1 * (cos)];
-
-            const [x, y] = [x2 + tx, y2 + ty ];
-
-            this.robotInfo = { x, y, angle: robotAngle, tfMapAngle: mapAngle_TF, tfOdomAngle: odomAngle_TF };
-            return { x, y, robotAngle, tfMapAngle: mapAngle_TF, tfOdomAngle: odomAngle_TF };
-        };
-        return { x: 0, y: 0, robotAngle: 0, tfMapAngle: 0, tfOdomAngle: 0 };
-    };
-    
-
-    // 切换相机
-    private checkRenderType = (mode: '2D' | '3D') => {
-        this.renderType = mode;
-        this.cameraInstance.checkCamera(mode, this.controlsInstance.controls, this.scene, this.offsetWH.width, this.offsetWH.height)
+    // 为某个object3D 添加一个label
+    private addLabel_object3D = (object: THREE.Object3D, labelName:string, color: string='#010112', position: any) => {
+        const labelCanvas = document.createElement('canvas');
+        labelCanvas.width = 50;
+        labelCanvas.height = 50;
+        labelCanvas.style.backgroundColor = "#FFF";
+        const labelContext = labelCanvas.getContext('2d')!;
+        labelContext.font = 'Bold 20px ';
+        labelContext.fillStyle = color;
+        labelContext.fillText(labelName, 0, 20);
+        
+        // 将Canvas转换为纹理
+        var labelTexture = new THREE.Texture(labelCanvas);
+        labelTexture.needsUpdate = true;
+        
+        // 创建Sprite以容纳标签
+        var labelMaterial = new THREE.SpriteMaterial({ map: labelTexture });
+        var labelSprite = new THREE.Sprite(labelMaterial);
+        labelSprite.position.copy(position);
+        labelSprite.scale.set(3, 3, 3); // 调整Sprite的大小
+        
+        // 将Sprite附加到Object3D上
+        object.add(labelSprite);
     };
 
 }

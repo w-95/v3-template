@@ -32,6 +32,7 @@ export class ThreeRenderGrid implements ThreeGridT{
         const { width, height } = info;
         const n = width > height ? height: width;
         this.grid = new THREE.GridHelper( n / gridSize, gridDivisions );
+        this.grid.rotation.x = THREE.MathUtils.degToRad(-90);
         return this.grid;
     }
 }
