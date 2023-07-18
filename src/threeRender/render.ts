@@ -226,7 +226,6 @@ export class FoxgloveThreeRenderer implements FoxgloveThreeRendererT{
         
         
         const {angle: robotAngle, x, y, childAngle: odomAngle, parentAngle} = this.robotInfo.map;
-        console.log(this.robotInfo.map)
         // 更新地图 角度
         new TWEEN.Tween(this.globalObject3D.rotation)
         .to({ x: THREE.MathUtils.degToRad(-90), z: THREE.MathUtils.degToRad(-odomAngle)}, 300)
@@ -263,6 +262,10 @@ export class FoxgloveThreeRenderer implements FoxgloveThreeRendererT{
     public topicScanChange = (message: TopicScanT) => {
         this.topicScanInfo = message;
 
+        if( !this.mapInstance.mesh || !this.robotInfo.base_link || !this.robotInfo.base_footprint){
+            return;
+        };
+
         // 更新点云
         this.pointInstance.drawPoint(message).then((group: THREE.Group) => {
             this.laserObject3D.add(group);
@@ -277,127 +280,116 @@ export class FoxgloveThreeRenderer implements FoxgloveThreeRendererT{
      */
     public topicWayPointChange = (message: wayPoint) => {
         this.wayPoints = message;
-        console.log(this.printerGroup)
+
+        if( !this.mapInstance.mesh ){
+            return;
+        };
+
+        // 如果地图更新了
         if(this.isMapChanged) {
             this.printerGroup.clear();
         };
         
         if(this.isMapChanged || this.printerGroup.children.length === 0){
+
             message.points.forEach((point, index) => {
-                if(index === 0) {
-                    const position = new THREE.Vector3(point.poses.position.x, point.poses.position.y + 0.1, point.poses.position.z);
-                // printerGroup
-                loader.load( '../src/assets/pointer/scene.gltf', ( gltf: GLTF ) => {
-                    gltf.scene.rotateX(THREE.MathUtils.degToRad(90));
-                    gltf.scene.scale.set(0.1, 0.1, 0.1);
-                    gltf.scene.position.copy(position);
-                    this.printerGroup.add(gltf.scene);
-                }, () => {
-                }, ( error: any ) => {
-                    console.error( '导入失败 -> ', error );
-                });
-                }
+                const position = new THREE.Vector3(point.poses.position.x, -point.poses.position.y, -0.3);
+                
+                const { point_type, point_id, point_name, poses} = point;
+                const { x, y } = poses.position;
+                
+                switch (point_type) {
+                    case 0:
+                        loader.load( '../src/assets/pointer/scene.gltf', ( gltf: GLTF ) => {
+                            gltf.scene.rotateX(THREE.MathUtils.degToRad(90));
+                            gltf.scene.scale.set(0.0001, 0.0001, 0.0001);
+                            gltf.scene.position.copy(position);
+                            this.printerGroup.add(gltf.scene);
+                            new TWEEN.Tween(gltf.scene.position)
+                            .to({ z: point.poses.position.z + 0.2 }, 1000) // 目标位置和动画时间
+                            .easing(TWEEN.Easing.Bounce.Out) // 弹出效果的缓动函数
+                            .delay((index + 1) * 300)
+                            .start();
+
+                            new TWEEN.Tween(gltf.scene.scale)
+                            .to({ x: .1, y: .1, z: .1 }, 1000)
+                            .easing(TWEEN.Easing.Elastic.Out)
+                            .delay((index + 1) * 300) // 延迟一段时间再执行缩放动画
+                            .start();
+                        },
+                        () => {},
+                        ( error: any ) => {
+                            console.error( '导入失败 -> ', error );
+                        });
+                        break;
+                    case 1:
+                        this.lightningPoint(point_id, x, -y, point_name, 1000);
+                        break;
+                    default:
+                        break;
+                };
             });
         }
         this.globalObject3D.add(this.printerGroup);
     };
 
     // 添加充电桩点位
-    private lightningPoint = () => {
-        const shapeLightning = new THREE.Shape();
-        shapeLightning.moveTo(0.07, 0.95);
-        shapeLightning.lineTo(-0.15, 0.67);
-        shapeLightning.lineTo(-0.03, 0.688);
-        shapeLightning.lineTo(-0.07, 0.45);
-        shapeLightning.lineTo(0.15, 0.712);
-        shapeLightning.lineTo(0.03, 0.71008);
+    private lightningPoint = (id: number, x: number, y: number, name: string, timer:number) => {
+        const scale2=0.2;
+        const outterR=1.0;
+        const heartH=2.0;
+        const innerR=0.5;
+        const heartShape = new THREE.Shape();
+        heartShape.arc ( 0,0, outterR*scale2, 0, Math.PI, false );
+        heartShape.lineTo(0, -heartH*scale2);
+        heartShape.lineTo(outterR*scale2, 0);
 
-        const shape = new THREE.Shape();
-        shape.arc(0, 0.7, 0.4, 0, 2 * Math.PI, false);
+        //内部闪电
+        const shape_c2 = new THREE.Path();
+        shape_c2.moveTo(-0.3*scale2,0.5*scale2) //左上角
+        shape_c2.lineTo(0.3*scale2,0.5*scale2) //右上角
+        shape_c2.lineTo(0.1*scale2,0.1*scale2);
+        shape_c2.lineTo(0.3*scale2,-0.1*scale2);
+        shape_c2.lineTo(-0.05*scale2,-0.9*scale2) //最下面的点
+        shape_c2.lineTo(0*scale2,-0.3*scale2);
+        shape_c2.lineTo(-0.3*scale2,0*scale2);
+        shape_c2.lineTo(-0.3*scale2,0.5*scale2);
+        heartShape.holes.push(shape_c2);
 
-        shape.holes.push(shapeLightning);
-
-        const extrudeSettings = {
-            depth: .1,
-            steps: 10,
-            bevelThickness: 0.1,
-            bevelSize: 0.08,
-            bevelOffset: 0,
-            bevelSegments: 1
-        };
-        const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
-        const material = new THREE.MeshPhongMaterial({
-            color: 0x00ff00,
-            side: THREE.DoubleSide
-        });
-        const mesh = new THREE.Mesh(geometry, material);
-        
-
-        // 创建空洞几何体
-        const holeGeometry = new THREE.ExtrudeGeometry(shapeLightning, extrudeSettings);
-        const holeMesh = new THREE.Mesh(holeGeometry);
-
-        // 使用ThreeCSG进行差集操作
-        const subtractBSP = CSG.fromMesh(mesh).subtract(CSG.fromMesh(holeMesh));
-
-        // 将结果转换为Three.js的几何体
-        const resultGeometry = CSG.toGeometry(subtractBSP, mesh.matrix);
-        const resultMesh = new THREE.Mesh(resultGeometry, material);
-
-        const shape1 = new THREE.Shape();
-        shape1.moveTo(-0.3, 0.45);
-        shape1.lineTo(0, 0.1);
-        shape1.lineTo(0.3, 0.45);
-        
-        const geometry2 = new THREE.ExtrudeGeometry(shape1, extrudeSettings);
-        const mesh2 = new THREE.Mesh(geometry2, material);
-
-        const group = new THREE.Group();
-        group.add(resultMesh, mesh2);
-        group.scale.set(.5, .5, .5);
-        const initialRotation = new THREE.Euler(THREE.MathUtils.degToRad(90), THREE.MathUtils.degToRad(0), THREE.MathUtils.degToRad(0));
-
-        group.rotation.copy(initialRotation);
-
-        this.globalObject3D.add(group);
-    };
-
-    // 添加普通点位
-    private addPoint_map = (x: number = 0, y: number = 0, color: number = 0x00ff00) => {
-        const shape = new THREE.Shape();
-        shape.arc(0, 0.7, 0.4, 0, 2 * Math.PI, false);
-
-        const path1 = new THREE.Path();
-        path1.arc(0, 0.7, 0.3, 0, 2 * Math.PI, false);
-        shape.holes.push(path1);
-
-        const extrudeSettings = {
-            depth: 0.0005
+        const extrudeSettings2 = {
+            amount:1,
+            steps: 1,
+            depth: 0.04,
+            bevelSize:0.1,
+            bevelThickness:0.1,
+            bevelSegments:2,
+            bevelEnabled:false,
         };
 
-        const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
-        const material = new THREE.MeshPhongMaterial({
-            color: 0x00ff00,
-            side: THREE.DoubleSide
-        });
-        const mesh = new THREE.Mesh(geometry, material);
+        const heartGeometry = new THREE.ExtrudeGeometry(heartShape, extrudeSettings2);
+        var bkColor = 0x2DCC6D;
 
-        const shape1 = new THREE.Shape();
-        shape1.moveTo(-0.2, 0.3);
-        shape1.lineTo(0, 0.1);
-        shape1.lineTo(0.2, 0.3);
+        const heartMesh = new THREE.Mesh(heartGeometry, new THREE.MeshStandardMaterial({ color: bkColor}));//终点颜色
+        heartMesh.rotateX(Math.PI /2);
+        heartMesh.name='heart';
 
-        const geometry2 = new THREE.ExtrudeGeometry(shape1, extrudeSettings);
-        const mesh2 = new THREE.Mesh(geometry2, material);
+        const position = new THREE.Vector3(x, y, -.4);
+        heartMesh.position.copy(position);
+        heartMesh.scale.set(.0001, .0001, .0001);
 
-        const group = new THREE.Group();
-        group.add(mesh, mesh2);
-        group.scale.set(.5, .5, .5);
-        const initialRotation = new THREE.Euler(THREE.MathUtils.degToRad(90), THREE.MathUtils.degToRad(0), THREE.MathUtils.degToRad(0));
+        this.globalObject3D.add(heartMesh);
 
-        group.rotation.copy(initialRotation);
+        new TWEEN.Tween(heartMesh.position)
+        .to({ z: .4 }, 1000) // 目标位置和动画时间
+        .easing(TWEEN.Easing.Bounce.Out) // 弹出效果的缓动函数
+        .delay(timer)
+        .start();
 
-        this.globalObject3D.add(group);
+        new TWEEN.Tween(heartMesh.scale)
+        .to({ x: 1, y: 1, z: 1 }, 1000)
+        .easing(TWEEN.Easing.Elastic.Out)
+        .delay(timer) // 延迟一段时间再执行缩放动画
+        .start();
     };
 
     /**

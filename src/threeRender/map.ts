@@ -4,11 +4,12 @@ import { TopicMapT, transforms } from '@/interface/foxgloveThree';
 import { getMapBase64 } from '@/utils/index';
 
 type ThreeMapT = {
+    mesh: THREE.Mesh | null;
     initMapMesh: (mapInfo: TopicMapT) => Promise<THREE.Mesh>
 };
 
 export class ThreeRenderMap implements ThreeMapT{
-    private mesh: THREE.Mesh | null;
+    public mesh: THREE.Mesh | null;
     private mapMaterial: THREE.MeshBasicMaterial  | null;
     private mapGeometry: THREE.PlaneGeometry | null;
 
