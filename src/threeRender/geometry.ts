@@ -79,7 +79,7 @@ export class ThreeRenderGeometry implements ThreeGeometryT{
         this.pointGroup = new THREE.Group();
         this.pointCloudGeometry = new THREE.BufferGeometry();
         this.pointCloudMaterial = new THREE.PointsMaterial({
-            size: 2, // 点的大小
+            size: 4, // 点的大小
             vertexColors: true, // 开启顶点颜色
             sizeAttenuation: false
             // color: 0xffffff,
@@ -89,6 +89,8 @@ export class ThreeRenderGeometry implements ThreeGeometryT{
         this.pointCloudGeometry.setAttribute('color', new THREE.BufferAttribute(this.colorsGeometry, 3));
 
         this.pointCloud = new THREE.Points(this.pointCloudGeometry, this.pointCloudMaterial);
+        const initialRotation = new THREE.Euler(THREE.MathUtils.degToRad(180), THREE.MathUtils.degToRad(0), THREE.MathUtils.degToRad(90));
+        this.pointCloud.rotation.copy(initialRotation)
         this.pointGroup.add(this.pointCloud);
     };
 
@@ -96,12 +98,8 @@ export class ThreeRenderGeometry implements ThreeGeometryT{
         return new Promise((resole, reject) => {
             const { angle_increment, angle_min, ranges } = message;
         
-            let positionsGeometry = new Float32Array(ranges.length * 3);
-            let colorsGeometry = new Float32Array(ranges.length * 3);
-    
-            this.pointCloudGeometry.setAttribute('position', new THREE.BufferAttribute(positionsGeometry, 3));
-            this.pointCloudGeometry.setAttribute('color', new THREE.BufferAttribute(colorsGeometry, 3));
-            
+            this.positionsGeometry = new Float32Array(ranges.length * 3);
+            this.colorsGeometry = new Float32Array(ranges.length * 3);
     
             let colors = new Float32Array(message.ranges.length * 3);
 

@@ -106,7 +106,7 @@ export const useFoxgloveSocket = (linkUrl: string, rosNumber: string, options: O
 
   // 通知服务器关于可用的客户端通道。注意，只有当服务器先前声明它具有clientPublish功能时，才允许客户端发布通道
   client.value.on('advertise', (newChannels: any) => {
-    console.log('client on :::advertise event', newChannels);
+    // console.log('client on :::advertise event', newChannels);
     if (!Array.isArray(newChannels)) {
       return;
     }
@@ -164,7 +164,7 @@ export const useFoxgloveSocket = (linkUrl: string, rosNumber: string, options: O
 
     if (topicChanInfo) {
       const message = topicChanInfo.parsedChannel.deserialize(data);
-      console.log("message::", message, '---', subscriptionId)
+      // console.log("message::", message, '---', subscriptionId)
       
       // 地图数据
       if( subscriptionId === 1 && message) {
@@ -185,8 +185,8 @@ export const useFoxgloveSocket = (linkUrl: string, rosNumber: string, options: O
       };
 
       // 点位信息
-      if(subscriptionId === 3) {
-        options.topicTfChange(message);
+      if(subscriptionId === 4) {
+        options.topicWayPointChange(message);
         return;
       }
     }
