@@ -58,6 +58,7 @@ const SRGBToLinear = (c: number): number => {
 
 type ThreeGeometryT = {
     drawPoint: (message: TopicScanT) => void;
+    pointGroup: THREE.Group
 };
 
 export class ThreeRenderGeometry implements ThreeGeometryT{
@@ -70,7 +71,7 @@ export class ThreeRenderGeometry implements ThreeGeometryT{
     private pointCloudGeometry: THREE.BufferGeometry;
     // 点云材质
     private pointCloudMaterial: THREE.PointsMaterial;
-    private pointGroup: THREE.Group;
+    public pointGroup: THREE.Group;
     private pointCloud: THREE.Points | undefined;
 
     constructor() {
@@ -79,7 +80,7 @@ export class ThreeRenderGeometry implements ThreeGeometryT{
         this.pointGroup = new THREE.Group();
         this.pointCloudGeometry = new THREE.BufferGeometry();
         this.pointCloudMaterial = new THREE.PointsMaterial({
-            size: 4, // 点的大小
+            size: 3, // 点的大小
             vertexColors: true, // 开启顶点颜色
             sizeAttenuation: false
             // color: 0xffffff,
@@ -89,8 +90,8 @@ export class ThreeRenderGeometry implements ThreeGeometryT{
         this.pointCloudGeometry.setAttribute('color', new THREE.BufferAttribute(this.colorsGeometry, 3));
 
         this.pointCloud = new THREE.Points(this.pointCloudGeometry, this.pointCloudMaterial);
-        const initialRotation = new THREE.Euler(THREE.MathUtils.degToRad(180), THREE.MathUtils.degToRad(0), THREE.MathUtils.degToRad(90));
-        this.pointCloud.rotation.copy(initialRotation)
+        // const initialRotation = new THREE.Euler(THREE.MathUtils.degToRad(180), THREE.MathUtils.degToRad(0), THREE.MathUtils.degToRad(90));
+        // this.pointCloud.rotation.copy(initialRotation)
         this.pointGroup.add(this.pointCloud);
     };
 
@@ -106,9 +107,10 @@ export class ThreeRenderGeometry implements ThreeGeometryT{
             if( ranges.length && this.pointCloud ) {
                 ranges.forEach((range, index) => {
                     const angle = message.angle_min + index * message.angle_increment;
-        
+                    // const angle = THREE.MathUtils.degToRad(message.angle_min + index * message.angle_increment);
+
                     // 将极坐标转换为笛卡尔坐标
-                    const x = range * Math.cos(angle); // 计算 x 坐标
+                    const x = range * Math.cos((angle)); // 计算 x 坐标
                     const y = range * Math.sin(angle); // 计算 y 坐标
                     let transformedPoint = new THREE.Vector3(x, y, 0);
                     
@@ -138,13 +140,6 @@ export class ThreeRenderGeometry implements ThreeGeometryT{
                 //   this.pointCloudGeometry.computeBoundingSphere();
                 this.pointCloudGeometry.setAttribute('position', new THREE.BufferAttribute(this.positionsGeometry, 3));
                 this.pointCloudGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-                // const initialRotation = new THREE.Euler(THREE.MathUtils.degToRad(0), THREE.MathUtils.degToRad(0), THREE.MathUtils.degToRad(-Math.round((Math.atan(robotInfo.tfAngle) * 180))));
-                // this.pointCloud.rotation.copy(initialRotation);
-    
-                // const initialRotation = new THREE.Euler(THREE.MathUtils.degToRad(0), THREE.MathUtils.degToRad(0), THREE.MathUtils.degToRad(-Math.round((Math.atan(robotInfo.tfAngle) * 180))));
-                // const { x: map3Dx, y: map3Dy, z: map3Dz } = laserObject3D.position;
-                // this.pointCloud.position.copy(new THREE.Vector3(map3Dx - robotInfo.x, -map3Dy - robotInfo.y, map3Dz))
-                // this.pointCloud.rotation.copy(initialRotation)
                 resole(this.pointGroup)
             }
         })

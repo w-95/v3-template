@@ -300,7 +300,6 @@ export const getMapBase64 = (bytes: Uint8Array, width: number, height: number) =
     canvas.width = width; //注意这里要打引号
     canvas.height = height;
 
-    console.log('width :::', width, 'height:::', height);
     let content = ctx.createImageData(width, height);
     for (let m = 0; m < width * height; m++) {
       c = bytes[readIndex++];

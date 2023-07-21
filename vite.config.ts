@@ -87,6 +87,13 @@ export default defineConfig({
         rewrite: (path) => path.replace(/^\/web_fe_api/, ''),
         ws: true,
       },
+      '/devtest': {
+        target: 'https://x.droid.ac.cn/devtest',
+        changeOrigin: true,
+        secure: false,
+        // rewrite: (path) => path.replace(/^\/devtest/, ''),
+        ws: true,
+      },
     },
   },
 

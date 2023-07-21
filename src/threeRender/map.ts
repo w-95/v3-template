@@ -21,12 +21,13 @@ export class ThreeRenderMap implements ThreeMapT{
 
     public initMapMesh = (mapInfo: TopicMapT):Promise<THREE.Mesh> => {
         return new Promise((resolve, reject) => {
+            console.log("地图信息：：", mapInfo)
             const { data, info } = mapInfo;
             const { width, height, resolution } = info;
             const [mw, mh] = [width * resolution, height * resolution];
     
             const grayImageInfo = getMapBase64(data, width, height);
-    
+
             // base64的纹理方式贴图
             const textureLoader = new THREE.TextureLoader();
             textureLoader.load(
@@ -40,9 +41,9 @@ export class ThreeRenderMap implements ThreeMapT{
                     this.mapMaterial = new THREE.MeshBasicMaterial({ map: texture, side: THREE.DoubleSide });
 
                     // 创建平面几何体，并应用材质
-                    this.mapGeometry = new THREE.PlaneGeometry(mw, mh, 10, 10);
+                    this.mapGeometry = new THREE.PlaneGeometry(-mw, mh, 10, 10);
                     this.mesh = new THREE.Mesh(this.mapGeometry, this.mapMaterial);
-                    // this.mesh.rotateX(180)
+                    // this.mesh.rotateY(THREE.MathUtils.degToRad(180))
                     this.mesh.castShadow = true;
                     this.mesh.receiveShadow = true;
 

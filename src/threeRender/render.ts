@@ -93,6 +93,7 @@ export class FoxgloveThreeRenderer implements FoxgloveThreeRendererT{
     public baseFootprintObject3D: THREE.Object3D;
     public baseLinkObject3D: THREE.Object3D;
     public laserObject3D: THREE.Object3D;
+    public modeObject3D: THREE.Object3D;
 
     constructor({ threeRenderDom, width, height }: { threeRenderDom: any, width: number, height: number}) {
         this.offsetWH = { width, height };
@@ -114,25 +115,27 @@ export class FoxgloveThreeRenderer implements FoxgloveThreeRendererT{
         this.baseFootprintObject3D = new THREE.Object3D();
         this.baseLinkObject3D = new THREE.Object3D();
         this.laserObject3D = new THREE.Object3D();
+        this.modeObject3D = new THREE.Object3D();
 
-        const mapAxes = new THREE.AxesHelper(2);
+        const mapAxes = new THREE.AxesHelper(1);
         const odomAxes = new THREE.AxesHelper(2);
-        const baseFootprintAxes = new THREE.AxesHelper(2);
-        const baseLinkAxes = new THREE.AxesHelper(2);
+        const baseFootprintAxes = new THREE.AxesHelper(1);
+        const baseLinkAxes = new THREE.AxesHelper(1);
         const laserAxes = new THREE.AxesHelper(2);
 
-        this.globalObject3D.add(new THREE.AxesHelper(10))
+        this.globalObject3D.add(new THREE.AxesHelper(2))
         this.mapObject3D.add(mapAxes);
         this.odomObject3D.add(odomAxes);
         this.baseFootprintObject3D.add(baseFootprintAxes);
         this.baseLinkObject3D.add(baseLinkAxes);
-        this.laserObject3D.add(laserAxes)
+        this.laserObject3D.add(laserAxes);
 
         this.globalObject3D.add(this.mapObject3D);
         this.globalObject3D.add(this.odomObject3D);
         this.odomObject3D.add(this.baseFootprintObject3D);
         this.baseFootprintObject3D.add(this.baseLinkObject3D);
         this.baseLinkObject3D.add(this.laserObject3D);
+        this.laserObject3D.add(this.modeObject3D);
 
         this.cameraInstance = new ThreeRenderCamera(width, height, this.scene);
 
@@ -145,7 +148,7 @@ export class FoxgloveThreeRenderer implements FoxgloveThreeRendererT{
         this.webGlInstance = new ThreeRenderWebgl(this.threeRenderDom, width, height);
         this.controlsInstance = new ThreeRenderControls(camera, this.webGlInstance.webGLRender);
         this.lightInstance = new ThreeRenderLight(this.scene);
-        this.modelInstance = new ThreeRenderModel(this.globalObject3D);
+        this.modelInstance = new ThreeRenderModel(this.laserObject3D);
 
         this.webGlInstance.render(this.scene, camera);
         
@@ -182,22 +185,19 @@ export class FoxgloveThreeRenderer implements FoxgloveThreeRendererT{
 
         // 加载地图
         const [threeOriginX, threeOriginY] = [width * resolution, height * resolution];
-        var position = new THREE.Vector3(threeOriginX / 2 + origin.position.x,  -threeOriginY / 2 - origin.position.y, 0);
-
+        var position = new THREE.Vector3(-(threeOriginX / 2 + origin.position.x),  -threeOriginY / 2 - origin.position.y, 0);
+        
         // 设置地图的起点
         this.mapObject3D.position.copy(position);
             
-        // // 初始化地图
+        // 初始化地图
         this.mapInstance.initMapMesh(message).then((mesh: THREE.Mesh) => {
             this.mapObject3D.add(mesh);
             this.mapObject3D.updateMatrixWorld();
         });
-            
-        // 添加线 将机器人、map、odom连接起来
-        this.createLineToMap_oDom();
 
         // 设置辅助网格
-        this.mapObject3D.add(this.gridInstance.initGrid(message))
+        this.mapObject3D.add(this.gridInstance.initGrid(message));
     };
 
     /**
@@ -207,7 +207,6 @@ export class FoxgloveThreeRenderer implements FoxgloveThreeRendererT{
      */
     public topicTfChange = (message: TopicTfT) => {
         const { transforms } = message;
-
         transforms.forEach((item) => {
             this.robotInfo[item.header.frame_id] = { ...item, ...this.getTfParentToChild_xy(item.header.frame_id, item.child_frame_id) };
             
@@ -224,11 +223,13 @@ export class FoxgloveThreeRenderer implements FoxgloveThreeRendererT{
             }
         });
         
-        
-        const {angle: robotAngle, x, y, childAngle: odomAngle, parentAngle} = this.robotInfo.map;
+        const { angle: mapAngle, x, y, childAngle: mapChildAngle, parentAngle: mapParentAngle} = this.robotInfo.map;
+        const { angle: baseLinkAngle, childAngle: baseLinkChildAngle, parentAngle: baseLinkParentAngle } = this.robotInfo.base_link;
+        const { angle: baseFootPrintAngle, childAngle: baseFootPrintChildAngle, parentAngle: baseFootPrintParentAngle } = this.robotInfo.base_footprint;
+        const { angle: odomAngle, childAngle: odomChildAngle, parentAngle: odomParentAngle } = this.robotInfo.odom;
         // 更新地图 角度
         new TWEEN.Tween(this.globalObject3D.rotation)
-        .to({ x: THREE.MathUtils.degToRad(-90), z: THREE.MathUtils.degToRad(-odomAngle)}, 300)
+        .to({ x: THREE.MathUtils.degToRad(-90), z: THREE.MathUtils.degToRad(-mapChildAngle)}, 500)
         // .to({ y:  -Math.round((Math.atan(tfOdomAngle) * 360) / Math.PI), x: THREE.MathUtils.degToRad(-90)}, 300)
         .easing(TWEEN.Easing.Quadratic.Out) // 设置动画缓动函数
         .onUpdate( () => {
@@ -236,21 +237,38 @@ export class FoxgloveThreeRenderer implements FoxgloveThreeRendererT{
             // this.mapObject3D.rotation.copy(initialRotation);
         })
         .start();
-       
-        if(this.modelInstance?.robotModuleGltf) {
-            // 更新机器人位置
-            const { x: map3Dx, y: map3Dy, z: map3Dz } = this.mapObject3D.position;
-            this.modelInstance.robotModuleGltf.scene.position.set(x, y, map3Dz + 0.1);
 
+        if(!this.positionLine) {
+            // 添加线 将机器人、map、odom连接起来
+            this.createLineToMap_oDom();
+        }else {
+            this.updateLineToMap_oDom();
+        };
+
+        console.log("map角度 ---", mapAngle, mapParentAngle, mapChildAngle)
+        console.log("odom角度 ---", odomAngle, odomParentAngle, odomChildAngle)
+        console.log("footPrint角度 ---", baseFootPrintAngle, baseFootPrintParentAngle, baseFootPrintChildAngle)
+        console.log("baselink角度 ---", baseLinkAngle, baseLinkParentAngle, baseLinkChildAngle)
+
+        if(this.modelInstance?.robotModuleGltf) {
+    
             // 更新连接机器人线的点位
             this.updateLineToMap_oDom();
-
+    
             // 旋转机器人
             // this.modelInstance.robotModuleGltf.scene.rotateY(robotAngle);
-            const angle = -Math.round((Math.atan(parentAngle + odomAngle) * 360) / Math.PI)
-            this.modelInstance.rotateModel(angle, (object: THREE.Euler, elapsed: number) => {
+            this.modelInstance.rotateModel(
+                THREE.MathUtils.degToRad(-this.getAngle(180 - (mapParentAngle + odomParentAngle + baseFootPrintParentAngle))),
+                (object: THREE.Euler, elapsed: number) => {
                 // this.modelInstance?.robotModuleGltf && this.modelInstance.robotModuleGltf.scene.rotateY(angle);
-            })
+            });
+
+            // -Math.round((Math.atan(angle) * 360) / Math.PI)
+            const xRotation = THREE.MathUtils.degToRad(0);
+            const yRotation = THREE.MathUtils.degToRad(0);
+            const zRotation = THREE.MathUtils.degToRad(-this.getAngle(180 - (mapParentAngle + odomParentAngle + baseFootPrintParentAngle + baseLinkParentAngle))); //转换为弧度
+
+            this.modeObject3D.rotation.set(xRotation, yRotation, zRotation);
         };
     };
     
@@ -268,8 +286,8 @@ export class FoxgloveThreeRenderer implements FoxgloveThreeRendererT{
 
         // 更新点云
         this.pointInstance.drawPoint(message).then((group: THREE.Group) => {
-            this.laserObject3D.add(group);
-            this.laserObject3D.updateMatrixWorld();
+            this.modeObject3D.add(group);
+            this.modeObject3D.updateMatrixWorld();
         });
     };
 
@@ -293,48 +311,18 @@ export class FoxgloveThreeRenderer implements FoxgloveThreeRendererT{
         if(this.isMapChanged || this.printerGroup.children.length === 0){
 
             message.points.forEach((point, index) => {
-                const position = new THREE.Vector3(point.poses.position.x, -point.poses.position.y, -0.3);
                 
                 const { point_type, point_id, point_name, poses} = point;
                 const { x, y } = poses.position;
-                
-                switch (point_type) {
-                    case 0:
-                        loader.load( '../src/assets/pointer/scene.gltf', ( gltf: GLTF ) => {
-                            gltf.scene.rotateX(THREE.MathUtils.degToRad(90));
-                            gltf.scene.scale.set(0.0001, 0.0001, 0.0001);
-                            gltf.scene.position.copy(position);
-                            this.printerGroup.add(gltf.scene);
-                            new TWEEN.Tween(gltf.scene.position)
-                            .to({ z: point.poses.position.z + 0.2 }, 1000) // 目标位置和动画时间
-                            .easing(TWEEN.Easing.Bounce.Out) // 弹出效果的缓动函数
-                            .delay((index + 1) * 300)
-                            .start();
-
-                            new TWEEN.Tween(gltf.scene.scale)
-                            .to({ x: .1, y: .1, z: .1 }, 1000)
-                            .easing(TWEEN.Easing.Elastic.Out)
-                            .delay((index + 1) * 300) // 延迟一段时间再执行缩放动画
-                            .start();
-                        },
-                        () => {},
-                        ( error: any ) => {
-                            console.error( '导入失败 -> ', error );
-                        });
-                        break;
-                    case 1:
-                        this.lightningPoint(point_id, x, -y, point_name, 1000);
-                        break;
-                    default:
-                        break;
-                };
+                this.lightningPoint(point_id, -x, -y, point_name, point_type, (index + 1) * 300);
             });
+            this.globalObject3D.add(this.printerGroup);
         }
-        this.globalObject3D.add(this.printerGroup);
+        
     };
 
-    // 添加充电桩点位
-    private lightningPoint = (id: number, x: number, y: number, name: string, timer:number) => {
+    // 添加点位
+    private lightningPoint = (id: number, x: number, y: number, name: string, point_type: number, timer:number) => {
         const scale2=0.2;
         const outterR=1.0;
         const heartH=2.0;
@@ -344,18 +332,27 @@ export class FoxgloveThreeRenderer implements FoxgloveThreeRendererT{
         heartShape.lineTo(0, -heartH*scale2);
         heartShape.lineTo(outterR*scale2, 0);
 
-        //内部闪电
-        const shape_c2 = new THREE.Path();
-        shape_c2.moveTo(-0.3*scale2,0.5*scale2) //左上角
-        shape_c2.lineTo(0.3*scale2,0.5*scale2) //右上角
-        shape_c2.lineTo(0.1*scale2,0.1*scale2);
-        shape_c2.lineTo(0.3*scale2,-0.1*scale2);
-        shape_c2.lineTo(-0.05*scale2,-0.9*scale2) //最下面的点
-        shape_c2.lineTo(0*scale2,-0.3*scale2);
-        shape_c2.lineTo(-0.3*scale2,0*scale2);
-        shape_c2.lineTo(-0.3*scale2,0.5*scale2);
-        heartShape.holes.push(shape_c2);
+        let bkColor = 0x2DCC6D;
 
+        if(point_type === 0) {
+            const shape_c1 = new THREE.Path();
+            shape_c1.ellipse(0,0,innerR*scale2,innerR*scale2,0,Math.PI*2,true,0);
+            heartShape.holes.push(shape_c1);
+            bkColor = 0xff921c;
+        }else if(point_type === 1) {
+            //内部闪电
+            const shape_c2 = new THREE.Path();
+            shape_c2.moveTo(-0.3*scale2,0.5*scale2) //左上角
+            shape_c2.lineTo(0.3*scale2,0.5*scale2) //右上角
+            shape_c2.lineTo(0.1*scale2,0.1*scale2);
+            shape_c2.lineTo(0.3*scale2,-0.1*scale2);
+            shape_c2.lineTo(-0.05*scale2,-0.9*scale2) //最下面的点
+            shape_c2.lineTo(0*scale2,-0.3*scale2);
+            shape_c2.lineTo(-0.3*scale2,0*scale2);
+            shape_c2.lineTo(-0.3*scale2,0.5*scale2);
+            heartShape.holes.push(shape_c2);
+        };
+        
         const extrudeSettings2 = {
             amount:1,
             steps: 1,
@@ -367,7 +364,7 @@ export class FoxgloveThreeRenderer implements FoxgloveThreeRendererT{
         };
 
         const heartGeometry = new THREE.ExtrudeGeometry(heartShape, extrudeSettings2);
-        var bkColor = 0x2DCC6D;
+        
 
         const heartMesh = new THREE.Mesh(heartGeometry, new THREE.MeshStandardMaterial({ color: bkColor}));//终点颜色
         heartMesh.rotateX(Math.PI /2);
@@ -376,8 +373,7 @@ export class FoxgloveThreeRenderer implements FoxgloveThreeRendererT{
         const position = new THREE.Vector3(x, y, -.4);
         heartMesh.position.copy(position);
         heartMesh.scale.set(.0001, .0001, .0001);
-
-        this.globalObject3D.add(heartMesh);
+        
 
         new TWEEN.Tween(heartMesh.position)
         .to({ z: .4 }, 1000) // 目标位置和动画时间
@@ -390,6 +386,8 @@ export class FoxgloveThreeRenderer implements FoxgloveThreeRendererT{
         .easing(TWEEN.Easing.Elastic.Out)
         .delay(timer) // 延迟一段时间再执行缩放动画
         .start();
+
+        this.printerGroup.add(heartMesh);
     };
 
     /**
@@ -425,25 +423,44 @@ export class FoxgloveThreeRenderer implements FoxgloveThreeRendererT{
 
         if(tfParent && activePoint) {
             
-            const { x: px, y: py, z: pz } = tfParent.transform.translation;
-            const { map, base_footprint, base_link }= this.robotInfo;
-            
-            const footx = base_footprint?.x ? base_footprint.x : 0;
-            const footy = base_footprint?.y ? base_footprint.y : 0;
-            const linkx = base_link?.x ? base_link.x : 0;
-            const linky = base_link?.y ? base_link.y : 0;
+            const { map, base_footprint, base_link, odom } = this.robotInfo;
 
-            // 原来是以地图中心点 将odomobject 加到globalobject3D后以一origin为准
+            // odom -> map
             if(tfName === "odom" && map) {
-                const position = new THREE.Vector3(activePoint.x + map.x - footx - linkx,  activePoint.y + map.y - footy - linky, pz);
+                const position = new THREE.Vector3(
+                    -map.transform.translation.x, 
+                    -map.transform.translation.y, 
+                    map.transform.translation.z
+                );
                 Object3D.position.copy(position);
                 return
             };
 
-            if(tfName === "base_footprint" || tfName === "base_link") {
-                const position = new THREE.Vector3(activePoint.x,  activePoint.y, pz);
+            // base_footprint -> odom
+            if(tfName === "base_footprint" && odom) {
+                const position = new THREE.Vector3(
+                    -(map.x - map.transform.translation.x),
+                    map.y - -map.transform.translation.y,
+                    map.transform.translation.z
+                );
                 Object3D.position.copy(position);
-                return;
+            };
+            // base_link -> base_footprint
+            if(tfName === "base_link" && base_footprint) {
+                const position = new THREE.Vector3(
+                    base_footprint.transform.translation.x * 2,
+                    base_footprint.transform.translation.y * 2, 
+                    base_footprint.transform.translation.z
+                );
+                Object3D.position.copy(position);
+            };
+
+            if(base_link) {
+                const position = new THREE.Vector3(
+                    base_link.transform.translation.x * 2, 
+                    base_link.transform.translation.y * 2, 
+                    base_link.transform.translation.z);
+                this.laserObject3D.position.copy(position);
             };
         };
     };
@@ -507,13 +524,12 @@ export class FoxgloveThreeRenderer implements FoxgloveThreeRendererT{
 
     // 更新线
     private updateLineToMap_oDom = () => {
-        const { robotModuleGltf } = this.modelInstance;
-
-        if(robotModuleGltf && this.positionLine) {
+        const { map }= this.robotInfo;
+        if(this.positionLine && map) {
             const positions = [
-                new THREE.Vector3(robotModuleGltf.scene.position.x, robotModuleGltf.scene.position.y, robotModuleGltf.scene.position.z),
-                new THREE.Vector3(this.odomObject3D.position.x, this.odomObject3D.position.y, this.odomObject3D.position.z),
-                new THREE.Vector3(-this.mapObject3D.position.x, -this.mapObject3D.position.y, this.mapObject3D.position.z)
+                new THREE.Vector3(-(map.x - map.transform.translation.x) + this.odomObject3D.position.x, map.y - -map.transform.translation.y + this.odomObject3D.position.y, map.transform.translation.z + .3),
+                new THREE.Vector3(this.odomObject3D.position.x, this.odomObject3D.position.y, this.odomObject3D.position.z + .3),
+                new THREE.Vector3(-this.globalObject3D.position.x, -this.globalObject3D.position.y, this.globalObject3D.position.z + .3)
             ];
             const geometry = new THREE.BufferGeometry().setFromPoints(positions);
             this.positionLine.setGeometry(geometry);
@@ -522,13 +538,13 @@ export class FoxgloveThreeRenderer implements FoxgloveThreeRendererT{
 
     // 创建机器人、map、odom坐标的线 将它们连起来
     private createLineToMap_oDom = () => {
-        if( this.modelInstance?.robotModuleGltf) {
-            const { robotModuleGltf } = this.modelInstance;
-
+        const { map }= this.robotInfo;
+        if( this.modelInstance?.robotModuleGltf && map) {
+            
             const positions = [
-                new THREE.Vector3(robotModuleGltf.scene.position.x, robotModuleGltf.scene.position.y, robotModuleGltf.scene.position.z),
-                new THREE.Vector3(this.odomObject3D.position.x, this.odomObject3D.position.y, this.odomObject3D.position.z),
-                new THREE.Vector3(-this.mapObject3D.position.x, -this.mapObject3D.position.y, this.mapObject3D.position.z)
+                new THREE.Vector3(-(map.x - map.transform.translation.x), map.y - -map.transform.translation.y, map.transform.translation.z+ .3),
+                new THREE.Vector3(this.odomObject3D.position.x, this.odomObject3D.position.y, this.odomObject3D.position.z+ .3),
+                new THREE.Vector3(-this.globalObject3D.position.x, -this.globalObject3D.position.y, this.globalObject3D.position.z+ .3)
             ];
             const geometry = new THREE.BufferGeometry().setFromPoints(positions);
     
@@ -551,29 +567,76 @@ export class FoxgloveThreeRenderer implements FoxgloveThreeRendererT{
         }
     };
 
+    // +- 180
+    private getAngle = (angle: number) => {
+        angle %= 360;
+        if (angle > 180) {
+            angle -= 360;
+        };
+        return angle
+    };
+
     // 为某个object3D 添加一个label
     private addLabel_object3D = (object: THREE.Object3D, labelName:string, color: string='#010112', position: any) => {
-        const labelCanvas = document.createElement('canvas');
-        labelCanvas.width = 50;
-        labelCanvas.height = 50;
-        labelCanvas.style.backgroundColor = "#FFF";
-        const labelContext = labelCanvas.getContext('2d')!;
-        labelContext.font = 'Bold 20px ';
-        labelContext.fillStyle = color;
-        labelContext.fillText(labelName, 0, 20);
-        
-        // 将Canvas转换为纹理
-        var labelTexture = new THREE.Texture(labelCanvas);
-        labelTexture.needsUpdate = true;
-        
-        // 创建Sprite以容纳标签
-        var labelMaterial = new THREE.SpriteMaterial({ map: labelTexture });
-        var labelSprite = new THREE.Sprite(labelMaterial);
-        labelSprite.position.copy(position);
-        labelSprite.scale.set(3, 3, 3); // 调整Sprite的大小
-        
-        // 将Sprite附加到Object3D上
-        object.add(labelSprite);
+        // const QUAD_POINTS: [number, number][] = [
+        //     [0, 0],
+        //     [0, 1],
+        //     [1, 0],
+        //     [1, 0],
+        //     [0, 1],
+        //     [1, 1],
+        // ];
+        // const atlasTexture = new THREE.DataTexture(
+        //     new Uint8ClampedArray(),
+        //     5,
+        //     3,
+        //     THREE.RGBAFormat,
+        //     THREE.UnsignedByteType,
+        //     THREE.UVMapping,
+        //     THREE.ClampToEdgeWrapping,
+        //     THREE.ClampToEdgeWrapping,
+        //     THREE.LinearFilter,
+        //     THREE.LinearFilter,
+        // );
+
+        // const QUAD_POSITIONS = new THREE.BufferAttribute(new Float32Array(QUAD_POINTS.flat()), 2);
+        // const QUAD_UVS = new THREE.BufferAttribute(
+        //     new Float32Array(QUAD_POINTS.flatMap(([x, y]) => [x, 1 - y])),
+        //     2,
+        // );
+
+        // const geometry = new THREE.InstancedBufferGeometry();
+
+        // geometry.setAttribute("position", QUAD_POSITIONS);
+        // geometry.setAttribute("uv", QUAD_UVS);
+
+        // const instanceAttrData = new Float32Array();
+        // const instanceAttrBuffer = new THREE.InstancedInterleavedBuffer(instanceAttrData, 10, 1);
+        // const instanceBoxPosition = new THREE.InterleavedBufferAttribute(instanceAttrBuffer, 2, 0);
+        // const instanceCharPosition = new THREE.InterleavedBufferAttribute(instanceAttrBuffer, 2, 2);
+        // const instanceUv = new THREE.InterleavedBufferAttribute(instanceAttrBuffer, 2, 4);
+        // const instanceBoxSize = new THREE.InterleavedBufferAttribute(instanceAttrBuffer, 2, 6);
+        // const instanceCharSize = new THREE.InterleavedBufferAttribute(instanceAttrBuffer, 2, 8);
+        // geometry.setAttribute("instanceBoxPosition", instanceBoxPosition);
+        // geometry.setAttribute("instanceCharPosition", instanceCharPosition);
+        // geometry.setAttribute("instanceUv", instanceUv);
+        // geometry.setAttribute("instanceBoxSize", instanceBoxSize);
+        // geometry.setAttribute("instanceCharSize", instanceCharSize);
+
+        // const material = new LabelMaterial({ atlasTexture: atlasTexture });
+        // const pickingMaterial = new LabelMaterial({ picking: true });
+
+        // const mesh = new THREE.InstancedMesh(geometry, material, 0);
+        // mesh.userData.pickingMaterial = pickingMaterial;
+
+        // const tempVec2 = new THREE.Vector2();
+        // mesh.onBeforeRender = () => {
+        //     this.webGlInstance.webGLRender.getSize(tempVec2);
+        //     material.uniforms.uCanvasSize!.value[0] = tempVec2.x;
+        //     material.uniforms.uCanvasSize!.value[1] = tempVec2.y;
+        //     pickingMaterial.uniforms.uCanvasSize!.value[0] = tempVec2.x;
+        //     pickingMaterial.uniforms.uCanvasSize!.value[1] = tempVec2.y;
+        // };
     };
 
 }
